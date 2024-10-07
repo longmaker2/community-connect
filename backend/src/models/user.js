@@ -7,11 +7,12 @@ const userSchema = new mongoose.Schema(
     name: { type: String, required: true },
     userType: {
       type: String,
-      enum: ['consumer', 'business'],
+      enum: ['consumer', 'business', 'artisan'],
       required: true,
     },
-    location: {
-      type: { type: String }
+    address: {
+      type: String,
+      required: true,
     },
   },
   {

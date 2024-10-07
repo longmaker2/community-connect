@@ -30,3 +30,25 @@ export const userRegistrationCtrl = async (req, res) => {
 };
 
 
+export const userLoginCtrl = async(req, res) => {
+  try {
+    const { email, password } = req.body;
+    const isUserExist = await User.findOne({email});
+    if(!isUserExist) {
+      res.status(400).json({message: 'User does not exist'});
+    }
+    const isPasswordCorrect = await bcrypt.compare(password, isUserExist.password);
+    if(!isPasswordCorrect) {
+      res.status(400).json({message: 'Invalid credentials'});
+    }
+    const token = jwt.sign(
+      { email: isUserExist.email, id: isUserExist._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+    res.status(200).json({user: isUserExist, token});
+
+  } catch (error) {
+    res.status(500).json({message: 'Something went wrong'})
+  }
+}

@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 const bookingSchema = new mongoose.Schema(
   {
-    service: { type: Schema.Types.ObjectId, ref: 'Service', required: true },
-    consumer: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    provider: { type: Schema.Types.ObjectId, ref: 'Profile', required: true },
+    service: { type: mongoose.Schema.Types.ObjectId, ref: 'Service', required: true },
+    consumer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    provider: { type: mongoose.Schema.Types.ObjectId, ref: 'Profile', required: true },
     date: { type: Date, required: true },
     startTime: { type: String, required: true },
     endTime: { type: String, required: true },

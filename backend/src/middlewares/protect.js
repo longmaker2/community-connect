@@ -1,24 +1,27 @@
-import User from '../models/user.js';
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
+import User from "../models/user.js";
 
-const authMiddleware = async (req, res, next) => {
+export const protect = async (req, res, next) => {
+  let token;
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  }
+
+  if (!token) {
+    return res.status(401).json({ message: "Not authorized, no token" });
+  }
+
   try {
-    const token = req?.headers?.authorization?.split(' ')[1];
-    if (token) {
-      const decodedData = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await User.findById(decodedData?.id);
-      if (user) {
-        req.user = user;
-        next();
-      } else {
-        res.status(404).json({ message: 'User not found...' });
-      }
-    } else {
-      res.status(401).json({ message: 'Unauthorized: Token not found' });
-    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    req.user = await User.findById(decoded.id).select("-password");
+    next();
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong' });
+    console.error(error);
+    return res.status(401).json({ message: "Not authorized, token failed" });
   }
 };
-
-export default authMiddleware;

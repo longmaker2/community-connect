@@ -3,16 +3,16 @@ import {
   createServiceCtrl,
   getServiceCtrl,
   searchServicesCtrl,
-} from "../controllers/serviceController.js";
+} from "../controllers/services/servicesCtrl.js";
 import {
   createBookingCtrl,
   getAllBookingsCtrl,
   getBookingByIdCtrl,
   updateBookingStatusCtrl,
   deleteBookingCtrl,
-} from "../controllers/bookingCtrl.js";
-import { protect } from "../middleware/authMiddleware.js";
-import authMiddleware from "../middleware/authMiddleware.js";
+} from "../controllers/bookings/bookingsCtrl.js";
+import { protect } from "../middlewares/protect.js";
+import authMiddleware from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 router.use(authMiddleware);

@@ -1,16 +1,34 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
+
 const reviewSchema = new mongoose.Schema(
   {
-    booking: { type: Schema.Types.ObjectId, ref: 'Booking', required: true },
-    reviewer: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    reviewee: { type: Schema.Types.ObjectId, ref: 'Profile', required: true },
-    rating: { type: Number, required: true, min: 1, max: 5 },
-    comment: String,
+    service: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Service",
+      required: true,
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    rating: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 5,
+    },
+    comment: {
+      type: String,
+      required: true,
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-const Review = mongoose.model('Review', reviewSchema);
+const Review = mongoose.model("Review", reviewSchema);
 export default Review;

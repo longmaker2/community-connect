@@ -11,7 +11,7 @@ import {
   updateBookingStatusCtrl,
   deleteBookingCtrl,
 } from "../controllers/bookings/bookingsCtrl.js";
-import protect from "../middlewares/protect.js";
+import {protect} from "../middlewares/protect.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 
 const router = express.Router();

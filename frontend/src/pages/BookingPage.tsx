@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
+import ChatPopup from "../components/Chatting";
 import {
   StarIcon,
   ChatBubbleLeftRightIcon,
@@ -344,59 +345,61 @@ const BookingPage: React.FC = () => {
           </div>
         </div>
       </div>
-
+              <ChatPopup/>
       {/* Chat Modal */}
-      {showChat && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">
-                Chat with {service?.name}
-              </h3>
-              <button onClick={() => setShowChat(false)}>
-                <XMarkIcon className="h-6 w-6 text-gray-600" />
-              </button>
-            </div>
+      {/* {showChat && (
+        // <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+        //   <div className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg">
+        //     <div className="flex justify-between items-center mb-4">
+        //       <h3 className="text-lg font-semibold">
+        //         Chat with {service?.name}
+        //       </h3>
+        //       <button onClick={() => setShowChat(false)}>
+        //         <XMarkIcon className="h-6 w-6 text-gray-600" />
+        //       </button>
+        //     </div>
 
-            <div className="h-64 overflow-y-scroll mb-4">
-              {messages.map((msg, index) => (
-                <div
-                  key={index}
-                  className={`mb-2 flex ${
-                    msg.sender === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <span
-                    className={`inline-block p-2 rounded-lg ${
-                      msg.sender === "user"
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
-                  >
-                    {msg.text}
-                  </span>
-                </div>
-              ))}
-            </div>
+        //     <div className="h-64 overflow-y-scroll mb-4">
+        //       {messages.map((msg, index) => (
+        //         <div
+        //           key={index}
+        //           className={`mb-2 flex ${
+        //             msg.sender === "user" ? "justify-end" : "justify-start"
+        //           }`}
+        //         >
+        //           <span
+        //             className={`inline-block p-2 rounded-lg ${
+        //               msg.sender === "user"
+        //                 ? "bg-blue-500 text-white"
+        //                 : "bg-gray-200 text-gray-700"
+        //             }`}
+        //           >
+        //             {msg.text}
+        //           </span>
+        //         </div>
+        //       ))}
+        //     </div>
 
-            <div className="flex">
-              <input
-                type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Type a message"
-                className="flex-1 p-2 border rounded-l-md"
-              />
-              <button
-                onClick={handleSendMessage}
-                className="bg-blue-600 text-white p-2 rounded-r-md"
-              >
-                Send
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        //     <div className="flex">
+        //       <input
+        //         type="text"
+        //         value={newMessage}
+        //         onChange={(e) => setNewMessage(e.target.value)}
+        //         placeholder="Type a message"
+        //         className="flex-1 p-2 border rounded-l-md"
+        //       />
+        //       <button
+        //         onClick={handleSendMessage}
+        //         className="bg-blue-600 text-white p-2 rounded-r-md"
+        //       >
+        //         Send
+        //       </button>
+        //     </div>
+        //   </div>
+        // </div>
+        
+      )} */}
+      
 
       <Footer />
     </>

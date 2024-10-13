@@ -1,6 +1,6 @@
 import React from "react";
 import { ReactTyped as Typed } from "react-typed";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   MagnifyingGlassIcon,
   CalendarDaysIcon,
@@ -85,6 +85,7 @@ const services = [
 ];
 
 const HomePage: React.FC = () => {
+  const navigate = useNavigate();
   return (
     <>
       <Navbar />
@@ -288,7 +289,10 @@ const HomePage: React.FC = () => {
           Join Community Connect to reach local customers and grow your
           business.
         </p>
-        <button className="bg-gray-800 text-white hover:bg-gray-600 py-1 px-10 rounded-md text-lg transition-transform transform hover:scale-110 duration-300">
+        <button
+          onClick={() => navigate("/provider-registration")} // Add this line to redirect to the registration form
+          className="bg-gray-800 text-white hover:bg-gray-600 py-1 px-10 rounded-md text-lg transition-transform transform hover:scale-110 duration-300"
+        >
           Join Now
         </button>
       </section>

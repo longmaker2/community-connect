@@ -8,6 +8,7 @@ import RegisterPage from "./pages/RegisterPage";
 import SettingsPage from "./pages/SettingsPage";
 import PrivateRoute from "./components/PrivateRoute";
 import BookingsPage from "./pages/BookingsPage";
+import ProviderRegistrationPage from "./pages/ProviderRegistrationPage";
 
 const App: React.FC = () => {
   return (
@@ -54,6 +55,15 @@ const App: React.FC = () => {
           element={
             <PrivateRoute>
               <BookingsPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/provider-registration"
+          element={
+            <PrivateRoute>
+              <ProviderRegistrationPage />
             </PrivateRoute>
           }
         />

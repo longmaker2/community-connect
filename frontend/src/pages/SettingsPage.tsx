@@ -1,5 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
+import {
+  setUserData,
+  toggleEnable2FA,
+  toggleAllowPublicProfile,
+  toggleEmailNotifications,
+  toggleSMSNotifications,
+  togglePushNotifications,
+} from "../features/settingsSlice";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import {
   UserCircleIcon,
   EnvelopeIcon,
@@ -9,31 +20,48 @@ import {
   DevicePhoneMobileIcon,
   DeviceTabletIcon,
 } from "@heroicons/react/24/outline";
-import Footer from "../components/Footer";
 
 const SettingsPage: React.FC = () => {
-  const [name, setName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const dispatch = useDispatch();
+  const settings = useSelector((state: any) => state.settings);
 
-  const [enable2FA, setEnable2FA] = useState(false);
-  const [allowPublicProfile, setAllowPublicProfile] = useState(true);
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/user/profile"
+        );
+        const { name, email } = response.data;
 
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [smsNotifications, setSmsNotifications] = useState(false);
-  const [pushNotifications, setPushNotifications] = useState(false);
+        dispatch(setUserData({ name, email }));
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
 
-  const handleAccountSubmit = (e: React.FormEvent) => {
+    fetchUserData();
+  }, [dispatch]);
+
+  const handleAccountSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Account details updated!");
-  };
 
-  const handlePrivacySave = () => {
-    alert("Privacy settings updated!");
-  };
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/user/auth/update",
+        {
+          name: settings.name,
+          email: settings.email,
+          password: settings.password,
+        }
+      );
 
-  const handleNotificationsSave = () => {
-    alert("Notification settings updated!");
+      if (response.status === 200) {
+        alert("Account details updated successfully!");
+      }
+    } catch (error) {
+      console.error("Error updating account details", error);
+      alert("Failed to update account details.");
+    }
   };
 
   return (
@@ -51,13 +79,14 @@ const SettingsPage: React.FC = () => {
             <form onSubmit={handleAccountSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm mb-1 flex items-center">
-                  <UserCircleIcon className="h-5 w-5 mr-2" />
-                  Name
+                  <UserCircleIcon className="h-5 w-5 mr-2" /> Name
                 </label>
                 <input
                   type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={settings.name}
+                  onChange={(e) =>
+                    dispatch(setUserData({ name: e.target.value }))
+                  }
                   className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 transition-transform hover:scale-105"
                   required
                 />
@@ -65,13 +94,14 @@ const SettingsPage: React.FC = () => {
 
               <div>
                 <label className="block text-sm mb-1 flex items-center">
-                  <EnvelopeIcon className="h-5 w-5 mr-2" />
-                  Email
+                  <EnvelopeIcon className="h-5 w-5 mr-2" /> Email
                 </label>
                 <input
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={settings.email}
+                  onChange={(e) =>
+                    dispatch(setUserData({ email: e.target.value }))
+                  }
                   className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 transition-transform hover:scale-105"
                   required
                 />
@@ -79,27 +109,29 @@ const SettingsPage: React.FC = () => {
 
               <div>
                 <label className="block text-sm mb-1 flex items-center">
-                  <LockClosedIcon className="h-5 w-5 mr-2" />
-                  Change Password
+                  <LockClosedIcon className="h-5 w-5 mr-2" /> Change Password
                 </label>
                 <input
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={settings.password}
+                  onChange={(e) =>
+                    dispatch(setUserData({ password: e.target.value }))
+                  }
                   className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 transition-transform hover:scale-105"
                 />
               </div>
 
-              <button className="w-full bg-gray-800 text-white p-2 rounded-md hover:bg-gray-600 transition-transform hover:scale-105">
+              <button
+                className="w-full bg-gray-800 text-white p-2 rounded-md hover:bg-gray-600 transition-transform hover:scale-105"
+                type="submit"
+              >
                 Save Changes
               </button>
             </form>
           </div>
 
-          {/* Privacy and Security Section */}
           <div className="mb-8">
             <h2 className="text-xl font-bold mb-4">Privacy and Security</h2>
-
             <div className="mb-3 flex items-center">
               <ShieldCheckIcon className="h-5 w-5 mr-2" />
               <label className="block text-sm mb-2">
@@ -107,8 +139,8 @@ const SettingsPage: React.FC = () => {
               </label>
               <input
                 type="checkbox"
-                checked={enable2FA}
-                onChange={() => setEnable2FA(!enable2FA)}
+                checked={settings.enable2FA}
+                onChange={() => dispatch(toggleEnable2FA())}
                 className="ml-auto h-4 w-4 text-blue-600 rounded"
               />
             </div>
@@ -118,21 +150,20 @@ const SettingsPage: React.FC = () => {
               <label className="block text-sm mb-2">Allow Public Profile</label>
               <input
                 type="checkbox"
-                checked={allowPublicProfile}
-                onChange={() => setAllowPublicProfile(!allowPublicProfile)}
+                checked={settings.allowPublicProfile}
+                onChange={() => dispatch(toggleAllowPublicProfile())}
                 className="ml-auto h-4 w-4 text-blue-600 rounded"
               />
             </div>
 
             <button
-              onClick={handlePrivacySave}
+              onClick={() => alert("Privacy settings updated!")}
               className="w-full bg-gray-800 text-white p-2 rounded-md hover:bg-gray-600 transition-transform hover:scale-105"
             >
               Save Changes
             </button>
           </div>
 
-          {/* Notification Settings Section */}
           <div className="mb-8">
             <h2 className="text-xl font-bold mb-4">Notifications</h2>
 
@@ -141,20 +172,19 @@ const SettingsPage: React.FC = () => {
               <label className="block text-sm mb-2">Email Notifications</label>
               <input
                 type="checkbox"
-                checked={emailNotifications}
-                onChange={() => setEmailNotifications(!emailNotifications)}
+                checked={settings.emailNotifications}
+                onChange={() => dispatch(toggleEmailNotifications())}
                 className="ml-auto h-4 w-4 text-blue-600 rounded"
               />
             </div>
 
             <div className="mb-3 flex items-center">
-              <DevicePhoneMobileIcon className="h-5 w-5 mr-2" />{" "}
-              {/* Corrected */}
+              <DevicePhoneMobileIcon className="h-5 w-5 mr-2" />
               <label className="block text-sm mb-2">SMS Notifications</label>
               <input
                 type="checkbox"
-                checked={smsNotifications}
-                onChange={() => setSmsNotifications(!smsNotifications)}
+                checked={settings.smsNotifications}
+                onChange={() => dispatch(toggleSMSNotifications())}
                 className="ml-auto h-4 w-4 text-blue-600 rounded"
               />
             </div>
@@ -164,14 +194,14 @@ const SettingsPage: React.FC = () => {
               <label className="block text-sm mb-2">Push Notifications</label>
               <input
                 type="checkbox"
-                checked={pushNotifications}
-                onChange={() => setPushNotifications(!pushNotifications)}
+                checked={settings.pushNotifications}
+                onChange={() => dispatch(togglePushNotifications())}
                 className="ml-auto h-4 w-4 text-blue-600 rounded"
               />
             </div>
 
             <button
-              onClick={handleNotificationsSave}
+              onClick={() => alert("Notification settings updated!")}
               className="w-full bg-gray-800 text-white p-2 rounded-md hover:bg-gray-600 transition-transform hover:scale-105"
             >
               Save Changes

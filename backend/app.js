@@ -3,6 +3,7 @@ import userRoutes from './src/routes/userRoutes.js';
 import serviceRoutes from './src/routes/serviceRoutes.js';
 import conversationRoutes from './src/routes/chats/conversationRoutes.js';
 import messageRoutes from './src/routes/chats/messagesRoutes.js';
+import bookingRoutes from './src/routes/bookingRoutes.js'
 import connectDb from './src/config/connectDb.js';
 import dotenv from 'dotenv';
 import cors from 'cors'
@@ -26,5 +27,6 @@ app.use('/api/service', serviceRoutes);
 app.use('/api/conversation', conversationRoutes);
 app.use('/api/messages', messageRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use('/api/booking', bookingRoutes);
 
 app.listen(port, () => console.log(`Server started on port ${port}`));

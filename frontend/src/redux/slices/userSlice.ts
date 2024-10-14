@@ -77,6 +77,7 @@ export const loginUser = createAsyncThunk<
       }
     );
     localStorage.setItem("userInfo", JSON.stringify(response.data));
+    localStorage.setItem("token", response.data.token); 
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -91,6 +92,7 @@ export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
   async (_, { rejectWithValue }) => {
     try {
       localStorage.removeItem("userInfo");
+      localStorage.removeItem("token");
     } catch (error) {
       return rejectWithValue("Logout failed");
     }

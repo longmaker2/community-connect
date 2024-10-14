@@ -2,20 +2,17 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 import { baseURL } from "../../utils/baseURL";
 
-// Updated User type
 type User = {
   id: string;
   email: string;
   userType: string;
 };
 
-// New AuthData type to represent the structure of the auth object
 type AuthData = {
   token: string;
   user: User;
 };
 
-// Updated UserState type
 type UserState = {
   auth: AuthData | null;
   loading: boolean;
@@ -25,6 +22,7 @@ type UserState = {
 type LoginCredentials = {
   email: string;
   password: string;
+  userType: string;
 };
 
 type RegisterData = {
@@ -51,7 +49,15 @@ export const registerUser = createAsyncThunk<
         headers: { "Content-Type": "application/json" },
       }
     );
-    localStorage.setItem("userInfo", JSON.stringify(response.data));
+    // Store user data and token in localStorage
+    localStorage.setItem("token", response.data.token);
+    if (response.data.user.userType === "customer") {
+      localStorage.setItem("customerInfo", JSON.stringify(response.data));
+    } else if (response.data.user.userType === "business") {
+      localStorage.setItem("businessInfo", JSON.stringify(response.data));
+    } else {
+      localStorage.setItem("artisanInfo", JSON.stringify(response.data));
+    }
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -76,8 +82,15 @@ export const loginUser = createAsyncThunk<
         headers: { "Content-Type": "application/json" },
       }
     );
-    localStorage.setItem("userInfo", JSON.stringify(response.data));
-    localStorage.setItem("token", response.data.token); 
+    // Store user data and token in localStorage
+    localStorage.setItem("token", response.data.token);
+    if (response.data.user.userType === "consumer") {
+      localStorage.setItem("consumerInfo", JSON.stringify(response.data));
+    } else if (response.data.user.userType === "business") {
+      localStorage.setItem("businessInfo", JSON.stringify(response.data));
+    } else {
+      localStorage.setItem("artisanInfo", JSON.stringify(response.data));
+    }
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -91,8 +104,11 @@ export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
   "user/logout",
   async (_, { rejectWithValue }) => {
     try {
-      localStorage.removeItem("userInfo");
+      // Remove all user info and token from localStorage
       localStorage.removeItem("token");
+      localStorage.removeItem("customerInfo");
+      localStorage.removeItem("businessInfo");
+      localStorage.removeItem("artisanInfo");
     } catch (error) {
       return rejectWithValue("Logout failed");
     }
@@ -100,7 +116,11 @@ export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
 );
 
 // Initialize state
-const userInfoFromStorage = localStorage.getItem("userInfo");
+const tokenFromStorage = localStorage.getItem("token");
+const userInfoFromStorage =
+  localStorage.getItem("consumerInfo") ||
+  localStorage.getItem("businessInfo") ||
+  localStorage.getItem("artisanInfo");
 const initialState: UserState = {
   auth: userInfoFromStorage ? JSON.parse(userInfoFromStorage) : null,
   loading: false,

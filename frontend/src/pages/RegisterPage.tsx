@@ -1,15 +1,16 @@
-import React, { useState } from "react";
-import { useAppDispatch } from "../redux/store/store";
-import { useNavigate, Link } from "react-router-dom";
 import {
-  UserIcon,
+  CheckIcon,
   EnvelopeIcon,
   LockClosedIcon,
+  UserIcon,
   UsersIcon,
-  CheckIcon,
+  MapPinIcon
 } from "@heroicons/react/24/outline";
-import { registerUser } from "../redux/slices/userSlice";
+import React, { useState } from "react";
 import toast from "react-hot-toast";
+import { Link, useNavigate } from "react-router-dom";
+import { registerUser } from "../redux/slices/userSlice";
+import { useAppDispatch } from "../redux/store/store";
 
 interface FormData {
   firstName: string;
@@ -54,7 +55,6 @@ const RegisterPage: React.FC = () => {
       setPasswordError("Passwords do not match");
       return;
     }
-    console.log(formData);
     const dataToSubmit = {
       firstName: formData.firstName,
       lastName: formData.lastName,
@@ -62,7 +62,7 @@ const RegisterPage: React.FC = () => {
       email: formData.email,
       password: formData.password,
       userType: formData.userType,
-      address: formData.address, // Add a default address or get it from formData
+      address: formData.address, 
     };
 
     // Call the register thunk action
@@ -70,6 +70,7 @@ const RegisterPage: React.FC = () => {
     if (typeof response.payload !== "string" && response.payload?.user) {
       navigate("/");
     } else {
+      console.log(response)
       toast.error(response.payload as string);
     }
   };
@@ -215,7 +216,7 @@ const RegisterPage: React.FC = () => {
             htmlFor="address"
             className="block text-lg mb-2 flex items-center"
           >
-            <UserIcon className="h-5 w-5 mr-2" />
+            <MapPinIcon className="h-5 w-5 mr-2" />
             Address
           </label>
           <input

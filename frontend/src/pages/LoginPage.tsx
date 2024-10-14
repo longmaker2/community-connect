@@ -1,27 +1,54 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useAppDispatch } from "../redux/store/store";
 import { useNavigate, Link } from "react-router-dom";
-import { loginSuccess } from "../features/authSlice";
 import {
   EnvelopeIcon,
   LockClosedIcon,
   UsersIcon,
   ArrowRightIcon,
 } from "@heroicons/react/24/outline";
+import { loginUser } from "../redux/slices/userSlice";
+import toast from "react-hot-toast";
+
+interface FormData {
+  email: string;
+  password: string;
+  userType: string;
+}
 
 const LoginPage: React.FC = () => {
-  const [identifier, setIdentifier] = useState("");
-  const [password, setPassword] = useState("");
-  const [userType, setUserType] = useState("consumer");
-  const dispatch = useDispatch();
+  const [formData, setFormData] = useState<FormData>({
+    email: "",
+    password: "",
+    userType: "consumer",
+  });
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
 
-    const fakeToken = "123456";
-    dispatch(loginSuccess({ email: identifier, token: fakeToken, userType }));
-    navigate("/");
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const loginData = {
+      email: formData.email, // Assuming the backend expects 'email' instead of 'identifier'
+      password: formData.password,
+    };
+
+    // Call the login thunk action
+    const response = await dispatch(loginUser(loginData));
+    if (typeof response.payload !== "string" && response.payload?.token) {
+      navigate("/");
+    } else {
+      toast.error(response.payload as string);
+    }
   };
 
   return (
@@ -35,13 +62,14 @@ const LoginPage: React.FC = () => {
             className="block text-lg mb-2 flex items-center"
           >
             <EnvelopeIcon className="h-5 w-5 mr-2" />
-            Email or Username
+            Email
           </label>
           <input
             type="text"
-            id="identifier"
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
             className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
             placeholder="Enter your email or username"
             required
@@ -60,8 +88,9 @@ const LoginPage: React.FC = () => {
           <input
             type="password"
             id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            name="password"
+            value={formData.password}
+            onChange={handleInputChange}
             className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
             placeholder="Enter your password"
             minLength={8}
@@ -80,8 +109,9 @@ const LoginPage: React.FC = () => {
           </label>
           <select
             id="userType"
-            value={userType}
-            onChange={(e) => setUserType(e.target.value)}
+            name="userType"
+            value={formData.userType}
+            onChange={handleInputChange}
             className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
           >
             <option value="consumer">Consumer</option>

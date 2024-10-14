@@ -8,6 +8,7 @@ import {
   ArrowRightIcon,
 } from "@heroicons/react/24/outline";
 import { loginUser } from "../redux/slices/userSlice";
+import toast from "react-hot-toast";
 
 interface FormData {
   email: string;
@@ -46,8 +47,7 @@ const LoginPage: React.FC = () => {
     if (typeof response.payload !== "string" && response.payload?.token) {
       navigate("/");
     } else {
-      console.log(response);
-      window.alert("Login failed. Please check your credentials.");
+      toast.error(response.payload as string);
     }
   };
 

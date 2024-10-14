@@ -9,6 +9,7 @@ import {
   CheckIcon,
 } from "@heroicons/react/24/outline";
 import { registerUser } from "../redux/slices/userSlice";
+import toast from "react-hot-toast";
 
 interface FormData {
   firstName: string;
@@ -69,8 +70,7 @@ const RegisterPage: React.FC = () => {
     if (typeof response.payload !== "string" && response.payload?.user) {
       navigate("/");
     } else {
-      console.log(response);
-      window.alert(response.payload);
+      toast.error(response.payload as string);
     }
   };
 

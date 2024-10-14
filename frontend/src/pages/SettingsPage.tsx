@@ -163,6 +163,7 @@ const SettingsPage: React.FC = () => {
                   onChange={(e) =>
                     setUserData({ ...userData, password: e.target.value })
                   }
+                  placeholder="Enter your password"
                   className={`w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 transition-transform hover:scale-105 ${
                     !isEditing ? "bg-gray-200" : ""
                   }`}

@@ -9,7 +9,6 @@ interface PrivateRouteProps {
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
 const user = useSelector((state: RootState) => state.user);
-console.log(user)
   if (!user?.auth?.token) {
     return <Navigate to="/login" />;
   }

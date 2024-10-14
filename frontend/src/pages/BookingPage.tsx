@@ -1,85 +1,10 @@
 import React, { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import ChatPopup from "../components/Chatting";
-import {
-  StarIcon,
-  ChatBubbleLeftRightIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { StarIcon } from "@heroicons/react/24/outline";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import Booking from "../components/Booking";
-
-// Sample service data (this will be fetched dynamically)
-const services = [
-  {
-    id: 1,
-    name: "John's Plumbing",
-    description:
-      "Expert plumbing services for residential and commercial needs.",
-    image: "https://via.placeholder.com/100", // Placeholder image URL
-    rating: 4.8,
-    isFeatured: true,
-  },
-  {
-    id: 2,
-    name: "Art by Sarah",
-    description: "Handcrafted art and custom designs for your home or office.",
-    image: "https://via.placeholder.com/100", // Placeholder image URL
-    rating: 4.5,
-    isFeatured: false,
-  },
-  {
-    id: 3,
-    name: "Wellness Center",
-    description: "Holistic health and wellness services for a balanced life.",
-    image: "https://via.placeholder.com/100", // Placeholder image URL
-    rating: 4.7,
-    isFeatured: true,
-  },
-  {
-    id: 4,
-    name: "John's Plumbing",
-    description:
-      "Expert plumbing services for residential and commercial needs.",
-    image: "https://via.placeholder.com/100", // Placeholder image URL
-    rating: 4.8,
-    isFeatured: true,
-  },
-  {
-    id: 5,
-    name: "Art by Sarah",
-    description: "Handcrafted art and custom designs for your home or office.",
-    image: "https://via.placeholder.com/100", // Placeholder image URL
-    rating: 4.5,
-    isFeatured: false,
-  },
-  {
-    id: 6,
-    name: "Wellness Center",
-    description: "Holistic health and wellness services for a balanced life.",
-    image: "https://via.placeholder.com/100", // Placeholder image URL
-    rating: 4.7,
-    isFeatured: true,
-  },
-  {
-    id: 7,
-    name: "John's Plumbing",
-    description:
-      "Expert plumbing services for residential and commercial needs.",
-    image: "https://via.placeholder.com/100", // Placeholder image URL
-    rating: 4.8,
-    isFeatured: true,
-  },
-  {
-    id: 8,
-    name: "Art by Sarah",
-    description: "Handcrafted art and custom designs for your home or office.",
-    image: "https://via.placeholder.com/100", // Placeholder image URL
-    rating: 4.5,
-    isFeatured: false,
-  },
-];
 
 interface Review {
   name: string;
@@ -90,9 +15,6 @@ interface Review {
 }
 
 const BookingPage: React.FC = () => {
-  const { serviceId } = useParams<{ serviceId: string }>();
-  const service = services.find((s) => s.id === parseInt(serviceId!));
-
   const [name, setName] = useState("");
   const [profilePicture] = useState("https://via.placeholder.com/40"); // Placeholder profile picture
   const [review, setReview] = useState("");
@@ -188,35 +110,8 @@ const BookingPage: React.FC = () => {
       date: new Date("2024-03-10"),
     },
   ]);
-
-  const [showChat, setShowChat] = useState(false);
-  const [messages, setMessages] = useState([
-    { sender: "provider", text: "Hello! How can I help you today?" },
-    { sender: "user", text: "I need help with a plumbing issue at my home." },
-  ]);
-  const [newMessage, setNewMessage] = useState("");
-
-  if (!service) {
-    return <div>Service not found</div>;
-  }
-
-  const handleChat = () => {
-    setShowChat(true);
-  };
-
-  const handleSendMessage = () => {
-    if (newMessage.trim() !== "") {
-      setMessages([...messages, { sender: "user", text: newMessage }]);
-      setNewMessage("");
-      // Simulate provider response
-      setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          { sender: "provider", text: "I can assist with that." },
-        ]);
-      }, 1000);
-    }
-  };
+  const { state } = useLocation();
+  console.log("state", state.provider);
 
   const handleSubmitReview = () => {
     const newReview: Review = {
@@ -240,27 +135,20 @@ const BookingPage: React.FC = () => {
           {/* Left side: Service Details (2/3 of the width) */}
           <div className="col-span-2 bg-gray-50 p-6 rounded-lg shadow-lg animate-slideInLeft">
             <img
-              src={service.image}
-              alt={service.name}
+              src={state?.image}
+              alt={state?.name}
               className="w-full h-40 object-cover rounded-lg mb-4 transition-transform hover:scale-105 duration-300"
             />
             <h1 className="text-3xl font-semibold mb-2 animate-slideDown">
-              {service.name}
+              {state?.name}
             </h1>
             <p className="text-gray-600 mb-4 animate-fadeIn">
-              {service.description}
+              {state?.description}
             </p>
             <div className="flex items-center mb-4 animate-bounceIn">
               <StarIcon className="h-5 w-5 text-yellow-500" />
-              <span className="ml-2 text-gray-600">{service.rating} / 5.0</span>
+              <span className="ml-2 text-gray-600">{state?.rating} / 5.0</span>
             </div>
-            <button
-              onClick={handleChat}
-              className="bg-gray-800 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition-transform transform hover:scale-110 duration-300 mb-4 animate-bounceIn"
-            >
-              Chat with Provider{" "}
-              <ChatBubbleLeftRightIcon className="inline h-5 w-5 ml-2" />
-            </button>
             <div>
               <h3 className="text-lg font-semibold mb-2">Submit a Review</h3>
               <input
@@ -345,61 +233,7 @@ const BookingPage: React.FC = () => {
           </div>
         </div>
       </div>
-              <ChatPopup/>
-      {/* Chat Modal */}
-      {/* {showChat && (
-        // <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-        //   <div className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg">
-        //     <div className="flex justify-between items-center mb-4">
-        //       <h3 className="text-lg font-semibold">
-        //         Chat with {service?.name}
-        //       </h3>
-        //       <button onClick={() => setShowChat(false)}>
-        //         <XMarkIcon className="h-6 w-6 text-gray-600" />
-        //       </button>
-        //     </div>
-
-        //     <div className="h-64 overflow-y-scroll mb-4">
-        //       {messages.map((msg, index) => (
-        //         <div
-        //           key={index}
-        //           className={`mb-2 flex ${
-        //             msg.sender === "user" ? "justify-end" : "justify-start"
-        //           }`}
-        //         >
-        //           <span
-        //             className={`inline-block p-2 rounded-lg ${
-        //               msg.sender === "user"
-        //                 ? "bg-blue-500 text-white"
-        //                 : "bg-gray-200 text-gray-700"
-        //             }`}
-        //           >
-        //             {msg.text}
-        //           </span>
-        //         </div>
-        //       ))}
-        //     </div>
-
-        //     <div className="flex">
-        //       <input
-        //         type="text"
-        //         value={newMessage}
-        //         onChange={(e) => setNewMessage(e.target.value)}
-        //         placeholder="Type a message"
-        //         className="flex-1 p-2 border rounded-l-md"
-        //       />
-        //       <button
-        //         onClick={handleSendMessage}
-        //         className="bg-blue-600 text-white p-2 rounded-r-md"
-        //       >
-        //         Send
-        //       </button>
-        //     </div>
-        //   </div>
-        // </div>
-        
-      )} */}
-      
+      <ChatPopup />
 
       <Footer />
     </>

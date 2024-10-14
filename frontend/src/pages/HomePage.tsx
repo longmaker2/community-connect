@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ReactTyped as Typed } from "react-typed";
 import { Link, useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../redux/store/store";
 import {
   MagnifyingGlassIcon,
   CalendarDaysIcon,
@@ -13,83 +14,50 @@ import {
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
-// Sample service data (this will be fetched dynamically)
-const services = [
-  {
-    id: 1,
-    name: "John's Plumbing",
-    description:
-      "Expert plumbing services for residential and commercial needs.",
-    image: "https://via.placeholder.com/100", // Placeholder image URL
-    rating: 4.8,
-    isFeatured: true,
-  },
-  {
-    id: 2,
-    name: "Art by Sarah",
-    description: "Handcrafted art and custom designs for your home or office.",
-    image: "https://via.placeholder.com/100", // Placeholder image URL
-    rating: 4.5,
-    isFeatured: false,
-  },
-  {
-    id: 3,
-    name: "Wellness Center",
-    description: "Holistic health and wellness services for a balanced life.",
-    image: "https://via.placeholder.com/100", // Placeholder image URL
-    rating: 4.7,
-    isFeatured: true,
-  },
-  {
-    id: 4,
-    name: "John's Plumbing",
-    description:
-      "Expert plumbing services for residential and commercial needs.",
-    image: "https://via.placeholder.com/100", // Placeholder image URL
-    rating: 4.8,
-    isFeatured: true,
-  },
-  {
-    id: 5,
-    name: "Art by Sarah",
-    description: "Handcrafted art and custom designs for your home or office.",
-    image: "https://via.placeholder.com/100", // Placeholder image URL
-    rating: 4.5,
-    isFeatured: false,
-  },
-  {
-    id: 6,
-    name: "Wellness Center",
-    description: "Holistic health and wellness services for a balanced life.",
-    image: "https://via.placeholder.com/100", // Placeholder image URL
-    rating: 4.7,
-    isFeatured: true,
-  },
-  {
-    id: 7,
-    name: "John's Plumbing",
-    description:
-      "Expert plumbing services for residential and commercial needs.",
-    image: "https://via.placeholder.com/100", // Placeholder image URL
-    rating: 4.8,
-    isFeatured: true,
-  },
-  {
-    id: 8,
-    name: "Art by Sarah",
-    description: "Handcrafted art and custom designs for your home or office.",
-    image: "https://via.placeholder.com/100", // Placeholder image URL
-    rating: 4.5,
-    isFeatured: false,
-  },
-];
+import { getServices, Service } from "../redux/slices/servicesSlice";
 
 const HomePage: React.FC = () => {
+  const [allServices, setAllServices] = useState<Service[]>([]);
+  const [servicesWithAvatars, setServicesWithAvatars] = useState<any[]>([]);
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { loading } = useAppSelector((state) => state.service);
+
+  useEffect(() => {
+    async function fetchServices() {
+      const response = await dispatch(getServices());
+      if (getServices.fulfilled.match(response)) {
+        setAllServices(response.payload);
+      }
+    }
+    fetchServices();
+  }, [dispatch]);
+  useEffect(() => {
+    async function generateAvatars() {
+      const servicesWithAvatars = await Promise.all(
+        allServices.map(async (service) => {
+          const avatarResponse = await fetch(
+            `https://avatar.iran.liara.run/public/boy?username=${service?.businessName}`
+          );
+          const avatarUrl = avatarResponse.url;
+          return {
+            ...service,
+            image: avatarUrl,
+            rating: (Math.random() * 2 + 3).toFixed(1),
+            isFeatured: Math.random() > 0.5,
+          };
+        })
+      );
+      setServicesWithAvatars(servicesWithAvatars);
+    }
+
+    if (allServices.length > 0) {
+      generateAvatars();
+    }
+  }, [allServices]);
   return (
     <>
       <Navbar />
-
       {/* Hero Section */}
       <section className="text-center py-20 px-6 bg-gray-100 animate-fadeIn">
         <h1 className="text-5xl font-bold text-gray-800 mb-4 animate-slideDown">
@@ -154,41 +122,51 @@ const HomePage: React.FC = () => {
       {/* Services Section */}
       <section className="py-16 px-4 bg-gray-100 animate-fadeIn">
         <h2 className="text-4xl font-bold mb-8 text-center">Our Services</h2>
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6">
-          {services.map((service) => (
-            <div
-              key={service.id}
-              className="p-4 bg-blue-50 rounded-lg shadow-md transform hover:scale-105 transition-transform duration-300"
-            >
-              <img
-                src={service.image}
-                alt={service.name}
-                className="w-full h-24 object-cover rounded-lg mb-2"
-              />
-              <h3 className="text-lg font-semibold mb-1">{service.name}</h3>
-              <p className="text-gray-600 text-sm line-clamp-2">
-                {service.description}
-              </p>
-              <div className="flex items-center my-2">
-                <StarIcon className="h-5 w-5 text-yellow-500" />
-                <span className="ml-1 text-gray-600">
-                  {service.rating} / 5.0
-                </span>
-              </div>
-              {service.isFeatured && (
-                <span className="text-white bg-green-500 px-2 py-1 mx-1 rounded-md text-xs">
-                  Featured
-                </span>
-              )}
-              <Link
-                to={`/booking/${service.id}`}
-                className="inline-block mt-4 bg-gray-800 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition-transform transform hover:scale-110 duration-300"
+        {loading ? (
+          <div
+            className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+            role="status"
+          ></div>
+        ) : (
+          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6">
+            {servicesWithAvatars.map((service) => (
+              <div
+                key={service.id}
+                className="p-4 bg-blue-50 rounded-lg shadow-md transform hover:scale-105 transition-transform duration-300"
               >
-                Book Now <ArrowRightIcon className="inline h-5 w-5 ml-1" />
-              </Link>
-            </div>
-          ))}
-        </div>
+                <img
+                  src={service.image}
+                  alt={service.name}
+                  className="w-full h-32 object-cover rounded-lg"
+                />
+                <h3 className="text-lg font-semibold mb-1">
+                  {service.businessName}
+                </h3>
+                <p className="text-gray-600 text-sm line-clamp-2">
+                  {service.description}
+                </p>
+                <div className="flex items-center my-2">
+                  <StarIcon className="h-5 w-5 text-yellow-500" />
+                  <span className="ml-1 text-gray-600">
+                    {service?.rating} / 5.0
+                  </span>
+                </div>
+                {service?.isFeatured && (
+                  <span className="text-white bg-green-500 px-2 py-1 mx-1 rounded-md text-xs">
+                    Featured
+                  </span>
+                )}
+                <Link
+                  to={`/booking/${service._id}`}
+                  state={service}
+                  className="inline-block mt-4 bg-gray-800 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition-transform transform hover:scale-110 duration-300"
+                >
+                  Book Now <ArrowRightIcon className="inline h-5 w-5 ml-1" />
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Service Categories Section */}

@@ -1,129 +1,112 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import ChatPopup from "../components/Chatting";
 import { StarIcon } from "@heroicons/react/24/outline";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import Booking from "../components/Booking";
+import axios from "axios";
+import { Spin } from "antd";
 
 interface Review {
   name: string;
   profilePicture: string;
   review: string;
   rating: number;
-  date: Date;
+  createdAt: string;
 }
+
+const generateInitialsProfile = (name: string) => {
+  const initialsText = name
+    .split(" ")
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
+  const canvas = document.createElement("canvas");
+  canvas.width = 40;
+  canvas.height = 40;
+  const context = canvas.getContext("2d");
+
+  if (context) {
+    context.fillStyle = "#555";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.font = "20px Arial";
+    context.fillStyle = "#FFF";
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText(initialsText, canvas.width / 2, canvas.height / 2);
+  }
+
+  return canvas.toDataURL();
+};
 
 const BookingPage: React.FC = () => {
   const [name, setName] = useState("");
-  const [profilePicture] = useState("https://via.placeholder.com/40"); // Placeholder profile picture
+  const [profilePicture, setProfilePicture] = useState<string>("");
   const [review, setReview] = useState("");
   const [rating, setRating] = useState(0);
-  const [reviews, setReviews] = useState<Review[]>([
-    // Dummy reviews
-    {
-      name: "Alice Johnson",
-      profilePicture: "https://via.placeholder.com/40",
-      review:
-        "Great service! The plumber was on time and fixed the issue quickly.",
-      rating: 5,
-      date: new Date("2024-01-01"),
-    },
-    {
-      name: "Michael Smith",
-      profilePicture: "https://via.placeholder.com/40",
-      review: "Good experience, but the price was a bit high for me.",
-      rating: 4,
-      date: new Date("2024-02-15"),
-    },
-    {
-      name: "Jane Doe",
-      profilePicture: "https://via.placeholder.com/40",
-      review: "The service was okay, but communication could be better.",
-      rating: 3,
-      date: new Date("2024-03-10"),
-    },
-    {
-      name: "Alice Johnson",
-      profilePicture: "https://via.placeholder.com/40",
-      review:
-        "Great service! The plumber was on time and fixed the issue quickly.",
-      rating: 5,
-      date: new Date("2024-01-01"),
-    },
-    {
-      name: "Michael Smith",
-      profilePicture: "https://via.placeholder.com/40",
-      review: "Good experience, but the price was a bit high for me.",
-      rating: 4,
-      date: new Date("2024-02-15"),
-    },
-    {
-      name: "Jane Doe",
-      profilePicture: "https://via.placeholder.com/40",
-      review: "The service was okay, but communication could be better.",
-      rating: 3,
-      date: new Date("2024-03-10"),
-    },
-    {
-      name: "Alice Johnson",
-      profilePicture: "https://via.placeholder.com/40",
-      review:
-        "Great service! The plumber was on time and fixed the issue quickly.",
-      rating: 5,
-      date: new Date("2024-01-01"),
-    },
-    {
-      name: "Michael Smith",
-      profilePicture: "https://via.placeholder.com/40",
-      review: "Good experience, but the price was a bit high for me.",
-      rating: 4,
-      date: new Date("2024-02-15"),
-    },
-    {
-      name: "Jane Doe",
-      profilePicture: "https://via.placeholder.com/40",
-      review: "The service was okay, but communication could be better.",
-      rating: 3,
-      date: new Date("2024-03-10"),
-    },
-    {
-      name: "Alice Johnson",
-      profilePicture: "https://via.placeholder.com/40",
-      review:
-        "Great service! The plumber was on time and fixed the issue quickly.",
-      rating: 5,
-      date: new Date("2024-01-01"),
-    },
-    {
-      name: "Michael Smith",
-      profilePicture: "https://via.placeholder.com/40",
-      review: "Good experience, but the price was a bit high for me.",
-      rating: 4,
-      date: new Date("2024-02-15"),
-    },
-    {
-      name: "Jane Doe",
-      profilePicture: "https://via.placeholder.com/40",
-      review: "The service was okay, but communication could be better.",
-      rating: 3,
-      date: new Date("2024-03-10"),
-    },
-  ]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
   const { state } = useLocation();
-  console.log("state", state.provider);
+  const { serviceId } = useParams<{ serviceId: string }>();
 
-  const handleSubmitReview = () => {
-    const newReview: Review = {
+  useEffect(() => {
+    const fetchReviews = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(
+          `http://localhost:5000/api/reviews/service/${serviceId}`
+        );
+        // console.log("Fetched reviews:", response.data);
+        setReviews(response.data);
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, [serviceId]);
+
+  const handleProfilePictureChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        if (reader.result) {
+          setProfilePicture(reader.result as string);
+        }
+      };
+
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    const newReview = {
       name,
       profilePicture,
       review,
       rating,
-      date: new Date(),
+      serviceId,
     };
-    setReviews([newReview, ...reviews]);
-    setReview("");
-    setRating(0);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/reviews",
+        newReview
+      );
+      setReviews([response.data, ...reviews]);
+      setReview("");
+      setRating(0);
+      setProfilePicture("");
+    } catch (error) {
+      console.error("Error submitting review:", error);
+    }
   };
 
   return (
@@ -132,7 +115,6 @@ const BookingPage: React.FC = () => {
 
       <div className="container mx-auto py-10 px-6 md:px-24 lg:px-40 animate-fadeIn">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Left side: Service Details (2/3 of the width) */}
           <div className="col-span-2 bg-gray-50 p-6 rounded-lg shadow-lg animate-slideInLeft">
             <img
               src={state?.image}
@@ -149,6 +131,7 @@ const BookingPage: React.FC = () => {
               <StarIcon className="h-5 w-5 text-yellow-500" />
               <span className="ml-2 text-gray-600">{state?.rating} / 5.0</span>
             </div>
+
             <div>
               <h3 className="text-lg font-semibold mb-2">Submit a Review</h3>
               <input
@@ -176,6 +159,12 @@ const BookingPage: React.FC = () => {
                 <option value={4}>4 Stars</option>
                 <option value={5}>5 Stars</option>
               </select>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleProfilePictureChange}
+                className="w-full p-2 border rounded-md mb-2"
+              />
               <button
                 onClick={handleSubmitReview}
                 className="bg-gray-800 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition-transform transform hover:scale-110 duration-300"
@@ -184,10 +173,11 @@ const BookingPage: React.FC = () => {
               </button>
             </div>
 
-            {/* Display the reviews */}
             <div className="mt-8">
               <h3 className="text-xl font-semibold mb-4">Customer Reviews</h3>
-              {reviews.length === 0 ? (
+              {loading ? (
+                <Spin size="small" />
+              ) : reviews.length === 0 ? (
                 <p className="text-gray-600">No reviews yet.</p>
               ) : (
                 <div className="space-y-4 animate-fadeIn">
@@ -197,7 +187,9 @@ const BookingPage: React.FC = () => {
                       className="bg-white p-4 rounded-lg shadow-md flex items-start space-x-4 transition-transform hover:scale-105 duration-300"
                     >
                       <img
-                        src={r.profilePicture}
+                        src={
+                          r.profilePicture || generateInitialsProfile(r.name)
+                        }
                         alt={r.name}
                         className="h-10 w-10 rounded-full"
                       />
@@ -205,7 +197,7 @@ const BookingPage: React.FC = () => {
                         <div className="flex items-center">
                           <h4 className="text-lg font-semibold">{r.name}</h4>
                           <span className="ml-2 text-gray-500 text-sm">
-                            {r.date.toLocaleDateString()}
+                            {new Date(r.createdAt).toLocaleDateString()}
                           </span>
                         </div>
                         <div className="flex items-center mb-2">
@@ -227,7 +219,6 @@ const BookingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right side: Booking Form (1/3 of the width, sticky) */}
           <div className="sticky top-0 self-start animate-slideInRight">
             <Booking />
           </div>

@@ -9,10 +9,11 @@ import {
   DevicePhoneMobileIcon,
   DeviceTabletIcon,
 } from "@heroicons/react/24/outline";
+import { Spin } from "antd";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { ToastContainer, toast } from "react-toastify"; // Import ToastContainer and toast
-import "react-toastify/dist/ReactToastify.css"; // Import styles
+import "react-toastify/dist/ReactToastify.css"; // Import styles 
 
 type PrivacySettingsKey =
   | "enable2FA"
@@ -63,7 +64,11 @@ const SettingsPage: React.FC = () => {
   }, []);
 
   if (isLoading) {
-    return <div className="text-center text-gray-800">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <Spin size="large" />
+      </div>
+    );
   }
 
   const handleAccountSubmit = async (e: React.FormEvent) => {
@@ -84,13 +89,13 @@ const SettingsPage: React.FC = () => {
         }
       );
       if (response.status === 200) {
-        toast.success("Account details updated successfully!"); // Use toast for notification
+        toast.success("Account details updated successfully!");
         setIsEditing(false);
         setUserData({ ...userData, password: "" });
       }
     } catch (error) {
       console.error("Error updating account details", error);
-      toast.error("Failed to update account details."); // Use toast for error
+      toast.error("Failed to update account details.");
     }
   };
 
@@ -255,7 +260,7 @@ const SettingsPage: React.FC = () => {
           </div>
         </div>
         <Footer />
-        <ToastContainer /> {/* Include ToastContainer here */}
+        <ToastContainer />
       </div>
     </>
   );

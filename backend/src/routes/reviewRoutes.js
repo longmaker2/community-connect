@@ -6,7 +6,7 @@ import {
 
 const router = express.Router();
 
-router.get("/:serviceId", getReviewsByService);
+router.get("/service/:serviceId", getReviewsByService);
 
 router.post("/", createReview);
 

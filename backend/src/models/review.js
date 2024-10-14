@@ -7,10 +7,12 @@ const reviewSchema = new mongoose.Schema(
       ref: "Service",
       required: true,
     },
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+    name: {
+      type: String,
       required: true,
+    },
+    profilePicture: {
+      type: String,
     },
     rating: {
       type: Number,
@@ -18,7 +20,7 @@ const reviewSchema = new mongoose.Schema(
       min: 1,
       max: 5,
     },
-    comment: {
+    review: {
       type: String,
       required: true,
     },

@@ -17,15 +17,27 @@ type ServicesData = {
   loading: boolean;
   error: string | null;
 };
+
+export interface newService {
+  businessName: string;
+  serviceTitle: string;
+  description: string;
+  pricing: string;
+  availability: string;
+  location: string;
+  bio: string;
+  phone: string;
+  website: string;
+  socialLinks: string;
+}
 export const getServices = createAsyncThunk<
   Service[],
   void,
   { rejectValue: string }
 >("services/getServices", async (_, { rejectWithValue, getState }) => {
-
   const config = {
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
   };
   try {
@@ -41,31 +53,44 @@ export const getServices = createAsyncThunk<
     return rejectWithValue("Failed to fetch services");
   }
 });
-export const getSingleService= createAsyncThunk<
+export const createService = createAsyncThunk<
   Service,
-  void,
+  newService,
   { rejectValue: string }
->("services/getService", async (serviceId, { rejectWithValue, getState }) => {
-  const { user: { auth: { token } } } = getState() as { user: { auth: { token: string } } };
-  const config = {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  };
-  try {
-    const response = await axios.get(`${baseURL}/service/${serviceId}`, config);
-
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return rejectWithValue(
-        error.response.data.message || "Failed to fetch services"
+>(
+  "services/createService",
+  async (serviceData: newService, { rejectWithValue, getState }) => {
+    const state = getState() as { user: { auth: { token: string } } };
+    const {
+      user: {
+        auth: { token },
+      },
+    } = state;
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    try {
+      const response = await axios.post(
+        `${baseURL}/service/services`,
+        serviceData,
+        config
       );
+
+      return response.data;
+    } catch (error) {
+      console.log("error", error);
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(
+          error.response.data.message || "Failed to fetch services"
+        );
+      }
+      return rejectWithValue("Failed to fetch services");
     }
-    return rejectWithValue("Failed to fetch services");
   }
-});
+);
 
 const initialState: ServicesData = {
   services: [],
@@ -97,18 +122,18 @@ const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload || "Failed to fetch services";
       })
-      .addCase(getSingleService.pending, (state) => {
+      .addCase(createService.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(
-        getSingleService.fulfilled,
+        createService.fulfilled,
         (state, action: PayloadAction<Service>) => {
           state.loading = false;
           state.services = action.payload;
         }
       )
-      .addCase(getSingleService.rejected, (state, action) => {
+      .addCase(createService.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to fetch services";
       });

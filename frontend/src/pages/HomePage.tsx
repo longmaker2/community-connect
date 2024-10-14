@@ -131,7 +131,7 @@ const HomePage: React.FC = () => {
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6">
             {servicesWithAvatars.map((service) => (
               <div
-                key={service.id}
+                key={service._id}
                 className="p-4 bg-blue-50 rounded-lg shadow-md transform hover:scale-105 transition-transform duration-300"
               >
                 <img

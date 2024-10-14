@@ -12,7 +12,7 @@ const router = express.Router();
 router.get('/services', getAllServices); 
 
 router.use(authMiddleware);
-router.post("/services", protect, createServiceCtrl);
+router.post("/services", createServiceCtrl);
 router.get("/services/provider/:id", getServiceCtrl);
 router.get("/services/search", searchServicesCtrl);
 

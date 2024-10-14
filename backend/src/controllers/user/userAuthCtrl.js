@@ -118,7 +118,9 @@ export const getUserProfileCtrl = async (req, res) => {
 
   try {
     // Select the correct fields based on your user model
-    const user = await User.findById(userId).select("firstName lastName username email");
+    const user = await User.findById(userId).select(
+      "firstName lastName username email"
+    );
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -126,12 +128,13 @@ export const getUserProfileCtrl = async (req, res) => {
 
     // Return the user data in the response
     res.status(200).json({
-      name: `${user.firstName} ${user.lastName}`, // Combine first and last name
+      name: `${user.firstName} ${user.lastName}`,
       email: user.email,
-      username: user.username, // Include username
+      username: user.username,
     });
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Something went wrong", error: error.message });
   }
 };
-

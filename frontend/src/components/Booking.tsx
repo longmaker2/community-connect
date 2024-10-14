@@ -1,42 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import Calendar, { CalendarProps } from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import {
-  setBookingDate,
-  addBooking,
-  setLoading,
-  setError,
-} from "../features/bookingSlice";
-import {
-  ClockIcon,
-  UserCircleIcon,
-  BriefcaseIcon,
-  CheckCircleIcon,
-} from "@heroicons/react/24/outline";
-
-// TypeScript interfaces
-interface Service {
-  _id: string;
-  businessName: string;
-  serviceTitle: string;
-}
-
-interface BookingData {
-  serviceProvider: string | null;
-  serviceType: string | null;
-  date: Date | null;
-  timeSlot: string | null;
-}
+import { setBookingDate, addBooking } from "../features/bookingSlice";
+import { baseURL } from "../utils/baseURL";
+import { ClockIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 
 const Booking: React.FC = () => {
   const [date, setDate] = useState<Date | null>(new Date());
   const [timeSlot, setTimeSlot] = useState<string | null>(null);
-  const [serviceProvider, setServiceProvider] = useState<string | null>(null);
-  const [serviceType, setServiceType] = useState<string | null>(null);
   const [bookingConfirmed, setBookingConfirmed] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [serviceProviders, setServiceProviders] = useState<Service[]>([]);
+  const [bookingError, setBookingError] = useState<string | null>(null);
 
   const dispatch = useDispatch();
 
@@ -52,31 +27,12 @@ const Booking: React.FC = () => {
     "5:00 PM",
   ];
 
-  // Fetch services on component mount
-  useEffect(() => {
-    const fetchServices = async () => {
-      dispatch(setLoading(true));
-      try {
-        const response = await fetch("http://localhost:5000/api/services"); // Adjust API URL
-        const data: Service[] = await response.json();
-        setServiceProviders(data);
-      } catch (error) {
-        dispatch(setError((error as Error).message)); // Type assertion for error
-      } finally {
-        dispatch(setLoading(false));
-      }
-    };
-
-    fetchServices();
-  }, [dispatch]);
-
-  // Adjusted handleDateChange to match the Calendar component's typing
+  // Handle date selection
   const handleDateChange: CalendarProps["onChange"] = (value) => {
     if (value instanceof Date) {
       setDate(value);
       dispatch(setBookingDate(value));
     } else if (Array.isArray(value)) {
-      // Handle range selection (if needed) or fallback to first date
       setDate(value[0]);
     } else {
       setDate(null);
@@ -84,15 +40,21 @@ const Booking: React.FC = () => {
   };
 
   const confirmBooking = async () => {
-    const bookingData: BookingData = {
-      serviceProvider,
-      serviceType,
+    const bookingData = {
       date,
       timeSlot,
     };
 
+    console.log("Sending booking data:", bookingData);
+
+    if (!date || !timeSlot) {
+      setBookingError("Please select both a date and a time slot.");
+      return;
+    }
+
     try {
-      const response = await fetch("http://localhost:5000/api/bookings", {
+      setBookingError(null);
+      const response = await fetch(`${baseURL}/bookings`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -100,16 +62,21 @@ const Booking: React.FC = () => {
         body: JSON.stringify(bookingData),
       });
 
-      if (response.ok) {
-        const newBooking = await response.json();
-        dispatch(addBooking(newBooking));
-        setBookingConfirmed(true);
-        setShowModal(true);
-      } else {
-        console.error("Error creating booking:", response.statusText);
+      console.log("Response status:", response.status);
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(errorMessage);
       }
-    } catch (error) {
-      console.error("Error creating booking:", error);
+
+      const newBooking = await response.json();
+      console.log("Booking created successfully:", newBooking);
+      dispatch(addBooking(newBooking));
+      setBookingConfirmed(true);
+      setShowModal(true);
+    } catch (error: any) {
+      setBookingError(`Error creating booking: ${error.message}`);
+      console.error("Error creating booking: ", error.message, error);
     }
   };
 
@@ -119,51 +86,12 @@ const Booking: React.FC = () => {
 
   return (
     <div className="booking-container p-4 bg-gray-50 rounded-lg shadow-md max-w-full animate-fadeIn">
-      {/* Select Service Provider */}
-      <div className="mb-6">
-        <label
-          htmlFor="serviceProvider"
-          className="block text-lg font-semibold mb-2 flex items-center "
-        >
-          <UserCircleIcon className="h-5 w-5 mr-2" /> Select Service Provider
-        </label>
-        <select
-          id="serviceProvider"
-          className="w-full p-3 border rounded-md transition-transform hover:scale-105"
-          onChange={(e) => setServiceProvider(e.target.value)}
-          value={serviceProvider || ""}
-        >
-          <option value="">Select a provider...</option>
-          {serviceProviders.map((provider) => (
-            <option key={provider._id} value={provider.businessName}>
-              {provider.businessName}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Select Service Type */}
-      <div className="mb-6">
-        <label
-          htmlFor="serviceType"
-          className="block text-lg font-semibold mb-2 flex items-center"
-        >
-          <BriefcaseIcon className="h-5 w-5 mr-2" /> Select Service Type
-        </label>
-        <select
-          id="serviceType"
-          className="w-full p-3 border rounded-md transition-transform hover:scale-105"
-          onChange={(e) => setServiceType(e.target.value)}
-          value={serviceType || ""}
-        >
-          <option value="">Select a service...</option>
-          {serviceProviders.map((service) => (
-            <option key={service.serviceTitle} value={service.serviceTitle}>
-              {service.serviceTitle}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* Display error message if booking fails */}
+      {bookingError && (
+        <div className="mb-4 text-red-600 bg-red-100 p-3 rounded-md">
+          {bookingError}
+        </div>
+      )}
 
       {/* Calendar Section */}
       <div className="mb-6">
@@ -199,22 +127,16 @@ const Booking: React.FC = () => {
       <button
         onClick={confirmBooking}
         className="mt-6 w-full bg-gray-800 text-white py-3 rounded-md hover:bg-gray-600 hover:scale-105 transition-transform duration-300 flex items-center justify-center"
-        disabled={!timeSlot || !serviceProvider || !serviceType}
+        disabled={!timeSlot || !date}
       >
         <CheckCircleIcon className="h-5 w-5 mr-2" />
         Confirm Booking
       </button>
 
-      {/* Booking Summary (Always visible after confirmation) */}
+      {/* Booking Summary */}
       {bookingConfirmed && (
         <div className="mt-6 bg-green-100 p-4 rounded-md transition-transform animate-bounceIn">
           <h3 className="text-xl font-bold mb-2">Booking Summary</h3>
-          <p>
-            <strong>Service Provider:</strong> {serviceProvider}
-          </p>
-          <p>
-            <strong>Service Type:</strong> {serviceType}
-          </p>
           <p>
             <strong>Date:</strong> {date?.toLocaleDateString()}
           </p>

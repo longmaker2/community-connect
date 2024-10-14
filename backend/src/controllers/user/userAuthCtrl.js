@@ -115,16 +115,24 @@ export const updateUserCtrl = async (req, res) => {
 
 export const getUserProfileCtrl = async (req, res) => {
   const userId = req.user.id;
+  console.log("User ID:", req.user.id);
 
   try {
-    const user = await User.findById(userId).select("name email");
+    // Select the correct fields based on your user model
+    const user = await User.findById(userId).select("firstName lastName username email");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json(user);
+    // Return the user data in the response
+    res.status(200).json({
+      name: `${user.firstName} ${user.lastName}`, // Combine first and last name
+      email: user.email,
+      username: user.username, // Include username
+    });
   } catch (error) {
     res.status(500).json({ message: "Something went wrong", error: error.message });
   }
 };
+

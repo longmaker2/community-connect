@@ -4,6 +4,7 @@ import profileReducer from "../features/profileSlice";
 import searchReducer from "../features/searchSlice";
 import bookingReducer from "../features/bookingSlice";
 import chatReducer from "../features/chatSlice";
+import settingsReducer from '../features/settingsSlice';
 
 const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ const store = configureStore({
     search: searchReducer,
     booking: bookingReducer,
     chat: chatReducer,
+    settings: settingsReducer,
   },
 });
 

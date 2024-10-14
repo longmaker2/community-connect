@@ -2,20 +2,17 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 import { baseURL } from "../../utils/baseURL";
 
-// Updated User type
 type User = {
   id: string;
   email: string;
   userType: string;
 };
 
-// New AuthData type to represent the structure of the auth object
 type AuthData = {
   token: string;
   user: User;
 };
 
-// Updated UserState type
 type UserState = {
   auth: AuthData | null;
   loading: boolean;
@@ -52,6 +49,8 @@ export const registerUser = createAsyncThunk<
         headers: { "Content-Type": "application/json" },
       }
     );
+    // Store user data and token in localStorage
+    localStorage.setItem("token", response.data.token);
     if (response.data.user.userType === "customer") {
       localStorage.setItem("customerInfo", JSON.stringify(response.data));
     } else if (response.data.user.userType === "business") {
@@ -83,6 +82,8 @@ export const loginUser = createAsyncThunk<
         headers: { "Content-Type": "application/json" },
       }
     );
+    // Store user data and token in localStorage
+    localStorage.setItem("token", response.data.token);
     if (response.data.user.userType === "consumer") {
       localStorage.setItem("consumerInfo", JSON.stringify(response.data));
     } else if (response.data.user.userType === "business") {
@@ -103,6 +104,8 @@ export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
   "user/logout",
   async (_, { rejectWithValue }) => {
     try {
+      // Remove all user info and token from localStorage
+      localStorage.removeItem("token");
       localStorage.removeItem("customerInfo");
       localStorage.removeItem("businessInfo");
       localStorage.removeItem("artisanInfo");
@@ -113,7 +116,11 @@ export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
 );
 
 // Initialize state
-const userInfoFromStorage = localStorage.getItem("consumerInfo") || localStorage.getItem("businessInfo") || localStorage.getItem("artisanInfo");
+const tokenFromStorage = localStorage.getItem("token");
+const userInfoFromStorage =
+  localStorage.getItem("consumerInfo") ||
+  localStorage.getItem("businessInfo") ||
+  localStorage.getItem("artisanInfo");
 const initialState: UserState = {
   auth: userInfoFromStorage ? JSON.parse(userInfoFromStorage) : null,
   loading: false,

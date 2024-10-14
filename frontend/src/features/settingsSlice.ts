@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface SettingsState {
   name: string;
@@ -12,22 +12,25 @@ interface SettingsState {
 }
 
 const initialState: SettingsState = {
-  name: '',
-  email: '',
-  password: '',
+  name: "",
+  email: "",
+  password: "",
   enable2FA: false,
-  allowPublicProfile: true,
-  emailNotifications: true,
+  allowPublicProfile: false,
+  emailNotifications: false,
   smsNotifications: false,
   pushNotifications: false,
 };
 
 const settingsSlice = createSlice({
-  name: 'settings',
+  name: "settings",
   initialState,
   reducers: {
     setUserData: (state, action: PayloadAction<Partial<SettingsState>>) => {
-      return { ...state, ...action.payload };
+      const { name, email, password } = action.payload;
+      if (name !== undefined) state.name = name;
+      if (email !== undefined) state.email = email;
+      if (password !== undefined) state.password = password;
     },
     toggleEnable2FA: (state) => {
       state.enable2FA = !state.enable2FA;

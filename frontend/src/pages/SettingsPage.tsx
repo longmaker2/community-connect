@@ -1,16 +1,5 @@
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {
-  setUserData,
-  toggleEnable2FA,
-  toggleAllowPublicProfile,
-  toggleEmailNotifications,
-  toggleSMSNotifications,
-  togglePushNotifications,
-} from "../features/settingsSlice";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 import {
   UserCircleIcon,
   EnvelopeIcon,
@@ -20,48 +9,100 @@ import {
   DevicePhoneMobileIcon,
   DeviceTabletIcon,
 } from "@heroicons/react/24/outline";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import { ToastContainer, toast } from "react-toastify"; // Import ToastContainer and toast
+import "react-toastify/dist/ReactToastify.css"; // Import styles
+
+type PrivacySettingsKey =
+  | "enable2FA"
+  | "allowPublicProfile"
+  | "emailNotifications"
+  | "smsNotifications"
+  | "pushNotifications";
 
 const SettingsPage: React.FC = () => {
-  const dispatch = useDispatch();
-  const settings = useSelector((state: any) => state.settings);
+  const [userData, setUserData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    username: "",
+  });
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [privacySettings, setPrivacySettings] = useState({
+    enable2FA: false,
+    allowPublicProfile: false,
+    emailNotifications: false,
+    smsNotifications: false,
+    pushNotifications: false,
+  });
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        const token = localStorage.getItem("token");
         const response = await axios.get(
-          "http://localhost:5000/api/user/profile"
+          "http://localhost:5000/api/user/auth/profile",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
-        const { name, email } = response.data;
-
-        dispatch(setUserData({ name, email }));
+        const { name, email, username } = response.data;
+        setUserData({ name, email, password: "", username });
       } catch (error) {
         console.error("Error fetching user data:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchUserData();
-  }, [dispatch]);
+  }, []);
+
+  if (isLoading) {
+    return <div className="text-center text-gray-800">Loading...</div>;
+  }
 
   const handleAccountSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
-      const response = await axios.post(
+      const updateData: { name?: string; password?: string } = {};
+      if (userData.name) updateData.name = userData.name;
+      if (userData.password) updateData.password = userData.password;
+
+      const token = localStorage.getItem("token");
+      const response = await axios.put(
         "http://localhost:5000/api/user/auth/update",
+        updateData,
         {
-          name: settings.name,
-          email: settings.email,
-          password: settings.password,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
-
       if (response.status === 200) {
-        alert("Account details updated successfully!");
+        toast.success("Account details updated successfully!"); // Use toast for notification
+        setIsEditing(false);
+        setUserData({ ...userData, password: "" });
       }
     } catch (error) {
       console.error("Error updating account details", error);
-      alert("Failed to update account details.");
+      toast.error("Failed to update account details."); // Use toast for error
     }
+  };
+
+  const handlePrivacyChange = (setting: PrivacySettingsKey) => {
+    setPrivacySettings((prevSettings) => ({
+      ...prevSettings,
+      [setting]: !prevSettings[setting],
+    }));
+  };
+
+  const toggleEditMode = () => {
+    setIsEditing(!isEditing);
   };
 
   return (
@@ -71,7 +112,6 @@ const SettingsPage: React.FC = () => {
         <h1 className="text-4xl font-bold text-gray-800 mb-6 text-center mt-8">
           Settings
         </h1>
-
         <div className="max-w-3xl mx-auto p-6 bg-white rounded-md shadow-md">
           {/* Account Settings Section */}
           <div className="mb-8">
@@ -83,12 +123,15 @@ const SettingsPage: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  value={settings.name}
+                  value={userData.name}
                   onChange={(e) =>
-                    dispatch(setUserData({ name: e.target.value }))
+                    setUserData({ ...userData, name: e.target.value })
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 transition-transform hover:scale-105"
+                  className={`w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 transition-transform hover:scale-105 ${
+                    !isEditing ? "bg-gray-200" : ""
+                  }`}
                   required
+                  readOnly={!isEditing}
                 />
               </div>
 
@@ -98,12 +141,15 @@ const SettingsPage: React.FC = () => {
                 </label>
                 <input
                   type="email"
-                  value={settings.email}
+                  value={userData.email}
                   onChange={(e) =>
-                    dispatch(setUserData({ email: e.target.value }))
+                    setUserData({ ...userData, email: e.target.value })
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 transition-transform hover:scale-105"
+                  className={`w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 transition-transform hover:scale-105 ${
+                    !isEditing ? "bg-gray-200" : ""
+                  }`}
                   required
+                  readOnly
                 />
               </div>
 
@@ -113,23 +159,36 @@ const SettingsPage: React.FC = () => {
                 </label>
                 <input
                   type="password"
-                  value={settings.password}
+                  value={userData.password}
                   onChange={(e) =>
-                    dispatch(setUserData({ password: e.target.value }))
+                    setUserData({ ...userData, password: e.target.value })
                   }
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 transition-transform hover:scale-105"
+                  className={`w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-500 transition-transform hover:scale-105 ${
+                    !isEditing ? "bg-gray-200" : ""
+                  }`}
+                  readOnly={!isEditing}
                 />
               </div>
 
               <button
                 className="w-full bg-gray-800 text-white p-2 rounded-md hover:bg-gray-600 transition-transform hover:scale-105"
-                type="submit"
+                type="button"
+                onClick={toggleEditMode}
               >
-                Save Changes
+                {isEditing ? "Cancel" : "Edit Profile"}
               </button>
+              {isEditing && (
+                <button
+                  className="w-full bg-gray-800 text-white p-2 rounded-md hover:bg-gray-600 transition-transform hover:scale-105"
+                  type="submit"
+                >
+                  Save Changes
+                </button>
+              )}
             </form>
           </div>
 
+          {/* Privacy and Security Section */}
           <div className="mb-8">
             <h2 className="text-xl font-bold mb-4">Privacy and Security</h2>
             <div className="mb-3 flex items-center">
@@ -139,8 +198,8 @@ const SettingsPage: React.FC = () => {
               </label>
               <input
                 type="checkbox"
-                checked={settings.enable2FA}
-                onChange={() => dispatch(toggleEnable2FA())}
+                checked={privacySettings.enable2FA}
+                onChange={() => handlePrivacyChange("enable2FA")}
                 className="ml-auto h-4 w-4 text-blue-600 rounded"
               />
             </div>
@@ -150,20 +209,14 @@ const SettingsPage: React.FC = () => {
               <label className="block text-sm mb-2">Allow Public Profile</label>
               <input
                 type="checkbox"
-                checked={settings.allowPublicProfile}
-                onChange={() => dispatch(toggleAllowPublicProfile())}
+                checked={privacySettings.allowPublicProfile}
+                onChange={() => handlePrivacyChange("allowPublicProfile")}
                 className="ml-auto h-4 w-4 text-blue-600 rounded"
               />
             </div>
-
-            <button
-              onClick={() => alert("Privacy settings updated!")}
-              className="w-full bg-gray-800 text-white p-2 rounded-md hover:bg-gray-600 transition-transform hover:scale-105"
-            >
-              Save Changes
-            </button>
           </div>
 
+          {/* Notifications Section */}
           <div className="mb-8">
             <h2 className="text-xl font-bold mb-4">Notifications</h2>
 
@@ -172,8 +225,8 @@ const SettingsPage: React.FC = () => {
               <label className="block text-sm mb-2">Email Notifications</label>
               <input
                 type="checkbox"
-                checked={settings.emailNotifications}
-                onChange={() => dispatch(toggleEmailNotifications())}
+                checked={privacySettings.emailNotifications}
+                onChange={() => handlePrivacyChange("emailNotifications")}
                 className="ml-auto h-4 w-4 text-blue-600 rounded"
               />
             </div>
@@ -183,8 +236,8 @@ const SettingsPage: React.FC = () => {
               <label className="block text-sm mb-2">SMS Notifications</label>
               <input
                 type="checkbox"
-                checked={settings.smsNotifications}
-                onChange={() => dispatch(toggleSMSNotifications())}
+                checked={privacySettings.smsNotifications}
+                onChange={() => handlePrivacyChange("smsNotifications")}
                 className="ml-auto h-4 w-4 text-blue-600 rounded"
               />
             </div>
@@ -194,22 +247,17 @@ const SettingsPage: React.FC = () => {
               <label className="block text-sm mb-2">Push Notifications</label>
               <input
                 type="checkbox"
-                checked={settings.pushNotifications}
-                onChange={() => dispatch(togglePushNotifications())}
+                checked={privacySettings.pushNotifications}
+                onChange={() => handlePrivacyChange("pushNotifications")}
                 className="ml-auto h-4 w-4 text-blue-600 rounded"
               />
             </div>
-
-            <button
-              onClick={() => alert("Notification settings updated!")}
-              className="w-full bg-gray-800 text-white p-2 rounded-md hover:bg-gray-600 transition-transform hover:scale-105"
-            >
-              Save Changes
-            </button>
           </div>
+
+          <Footer />
         </div>
+        <ToastContainer /> {/* Include ToastContainer here */}
       </div>
-      <Footer />
     </>
   );
 };

@@ -50,10 +50,10 @@ export const userRegistrationCtrl = async (req, res) => {
 
 export const userLoginCtrl = async(req, res) => {
   try {
-    const { identifier, password } = req.body;
+    const { email, password } = req.body;
 
     const user = await User.findOne({
-      $or: [{ email: identifier }, { username: identifier }],
+      email,
     });
     if (!user) {
       return res.status(404).json({ message: "User not found" });

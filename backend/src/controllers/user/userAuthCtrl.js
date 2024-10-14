@@ -49,10 +49,9 @@ export const userRegistrationCtrl = async (req, res) => {
 
 export const userLoginCtrl = async (req, res) => {
   try {
-    const { email, password } = req.body;
-
+    const { email, password, userType } = req.body;
     const user = await User.findOne({
-      email,
+      $and: [{ email }, { userType }],
     });
     if (!user) {
       return res.status(404).json({ message: "User not found" });

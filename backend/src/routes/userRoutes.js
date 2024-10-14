@@ -4,7 +4,7 @@ import {
   userRegistrationCtrl,
   updateUserCtrl,
 } from "../controllers/user/userAuthCtrl.js";
-import { protect } from '../middlewares/protect.js';
+import { protect } from "../middlewares/protect.js";
 
 const router = express.Router();
 router.post("/register", userRegistrationCtrl);

@@ -43,12 +43,11 @@ export const userRegistrationCtrl = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: 'Something went wrong' });
+    res.status(500).json({ message: "Something went wrong" });
   }
 };
 
-
-export const userLoginCtrl = async(req, res) => {
+export const userLoginCtrl = async (req, res) => {
   try {
     const { email, password } = req.body;
 

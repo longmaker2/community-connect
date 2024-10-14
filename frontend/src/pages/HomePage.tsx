@@ -286,14 +286,14 @@ const HomePage: React.FC = () => {
           Are You a Business or Service Provider?
         </h2>
         <p className="text-lg mb-8">
-          Join Community Connect to reach local customers and grow your
-          business.
+          Register your business with Community Connect to reach local customers
+          and grow your business.
         </p>
         <button
           onClick={() => navigate("/provider-registration")} // Add this line to redirect to the registration form
           className="bg-gray-800 text-white hover:bg-gray-600 py-1 px-10 rounded-md text-lg transition-transform transform hover:scale-110 duration-300"
         >
-          Join Now
+          Register Now
         </button>
       </section>
 

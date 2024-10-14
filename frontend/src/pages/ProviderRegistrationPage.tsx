@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { useAppDispatch } from "../redux/store/store";
 import {
   UserIcon,
   BriefcaseIcon,
@@ -18,28 +18,24 @@ import {
   TagIcon,
   PhotoIcon,
 } from "@heroicons/react/24/outline";
+import { createService } from "../redux/slices/servicesSlice";
+import toast from "react-hot-toast";
 
 const ProviderRegistrationPage: React.FC = () => {
   const navigate = useNavigate();
-
+  const dispatch = useAppDispatch();
   const [formData, setFormData] = useState({
     businessName: "",
     serviceTitle: "",
-    imageUrl: "",
     description: "",
     pricing: "",
     availability: "",
     location: "",
     bio: "",
-    serviceCategory: "",
-    email: "",
     phone: "",
     website: "",
     socialLinks: "",
   });
-
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -49,29 +45,13 @@ const ProviderRegistrationPage: React.FC = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await axios.post("http://localhost:5000/api/service", {
-        ...formData,
-        imageUrl: imagePreview, // Include the image preview URL if needed
-      });
-      alert("Registration Successful! You will be contacted soon.");
-      navigate("/"); // Redirect to home page after submission
-    } catch (error) {
-      console.error("Registration failed:", error);
-      alert("Registration failed. Please try again."); // Show an error message
+    const response = await dispatch(createService(formData));
+    if (typeof response.payload !== 'string' && (response.payload as any)?.service) {
+      navigate('/')
+    } else {
+      toast.error(response.payload as string);
     }
   };
 
@@ -125,7 +105,7 @@ const ProviderRegistrationPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="mb-4 animate-fadeIn delay-300">
+          {/* <div className="mb-4 animate-fadeIn delay-300">
             <label className="block text-gray-700 font-semibold mb-2">
               Upload Service Image
             </label>
@@ -151,7 +131,7 @@ const ProviderRegistrationPage: React.FC = () => {
                 />
               </div>
             )}
-          </div>
+          </div> */}
           <div className="mb-4 animate-fadeIn delay-400">
             <label className="block text-gray-700 font-semibold mb-2">
               Service Description
@@ -247,7 +227,7 @@ const ProviderRegistrationPage: React.FC = () => {
               />
             </div>
           </div>
-          <div className="mb-4 animate-fadeIn delay-900">
+          {/* <div className="mb-4 animate-fadeIn delay-900">
             <label className="block text-gray-700 font-semibold mb-2">
               Service Category
             </label>
@@ -268,8 +248,8 @@ const ProviderRegistrationPage: React.FC = () => {
                 <option value="Health & Wellness">Health & Wellness</option>
               </select>
             </div>
-          </div>
-          <div className="mb-4 animate-fadeIn delay-1000">
+          </div> */}
+          {/* <div className="mb-4 animate-fadeIn delay-1000">
             <label className="block text-gray-700 font-semibold mb-2">
               Email Address 
             </label>
@@ -287,7 +267,7 @@ const ProviderRegistrationPage: React.FC = () => {
                 required
               />
             </div>
-          </div>
+          </div> */}
           <div className="mb-4 animate-fadeIn delay-1100">
             <label className="block text-gray-700 font-semibold mb-2">
               Phone Number

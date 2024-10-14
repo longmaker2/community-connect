@@ -140,7 +140,7 @@ const BookingPage: React.FC = () => {
               className="w-full h-40 object-cover rounded-lg mb-4 transition-transform hover:scale-105 duration-300"
             />
             <h1 className="text-3xl font-semibold mb-2 animate-slideDown">
-              {state?.name}
+              {state?.businessName}
             </h1>
             <p className="text-gray-600 mb-4 animate-fadeIn">
               {state?.description}

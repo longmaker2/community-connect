@@ -30,9 +30,8 @@ const ChatPopup: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
 
-  const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
-  const otherUser = JSON.parse(localStorage.getItem('friend') || '{}');
-
+  const loggedInUser = JSON.parse(localStorage.getItem('consumerInfo') || '{}');
+  const otherUser = JSON.parse(localStorage.getItem('businessInfo') || '{}');
   const initializeSocket = useCallback(() => {
     socketRef.current = io("http://localhost:8900", {
       reconnectionDelay: 1000,
@@ -43,7 +42,6 @@ const ChatPopup: React.FC = () => {
       upgrade: false,
       rejectUnauthorized: false
     });
-
     socketRef.current.on("connect_error", (err: Error) => {
       console.log(`connect_error due to ${err.message}`);
     });
@@ -52,7 +50,7 @@ const ChatPopup: React.FC = () => {
       console.log(`Socket error: ${err.message}`);
     });
 
-    socketRef.current.emit('new-user', loggedInUser.id);
+    socketRef.current.emit('new-user', loggedInUser?.user?.id);
 
     socketRef.current.on('getMessage', (data: Message) => {
       setMessages(prevMessages => [...prevMessages, data]);
@@ -61,27 +59,26 @@ const ChatPopup: React.FC = () => {
     return () => {
       socketRef.current?.disconnect();
     };
-  }, [loggedInUser.id]);
+  }, [loggedInUser?.user?.id]);
 
   useEffect(() => {
     initializeSocket();
   }, [initializeSocket]);
 
   const fetchConversationAndMessages = useCallback(async () => {
-    if (!loggedInUser.id || !otherUser.id) return;
+    if (!loggedInUser?.user?.id || !otherUser?.user?.id) return;
 
     try {
-      const conversationResp = await fetch(`http://localhost:5000/api/conversation/our/${loggedInUser.id}/${otherUser.id}`);
+      const conversationResp = await fetch(`http://localhost:5000/api/conversation/our/${loggedInUser?.user?.id}/${otherUser?.user?.id}`);
       const conversationData = await conversationResp.json();
       setConversation(conversationData);
-
-      const messagesResp = await fetch(`http://localhost:5000/api/messages/${conversationData._id}`);
+      const messagesResp = await fetch(`http://localhost:5000/api/messages/${conversationData?._id}`);
       const messagesData = await messagesResp.json();
       setMessages(messagesData);
     } catch (error) {
       console.error('Error fetching conversation or messages', error);
     }
-  }, [loggedInUser.id, otherUser.id]);
+  }, [loggedInUser?.user?.id, otherUser?.user?.id]);
 
   useEffect(() => {
     if (isOpen) {
@@ -98,14 +95,14 @@ const ChatPopup: React.FC = () => {
   const handleSendMessage = useCallback(async () => {
     if (inputMessage.trim() && conversation) {
       const newMessage: NewMessage = {
-        conversationId: conversation._id,
-        senderId: loggedInUser.id,
-        text: inputMessage.trim(),
+        conversationId: conversation?._id,
+        senderId: loggedInUser?.user?.id,
+        text: inputMessage?.trim(),
       };
 
       socketRef.current?.emit('sendMessage', {
-        senderId: loggedInUser.id,
-        receiverId: otherUser.id,
+        senderId: loggedInUser.user.id,
+        receiverId: otherUser.user.id,
         text: inputMessage
       });
 
@@ -126,7 +123,7 @@ const ChatPopup: React.FC = () => {
         console.error('Error sending message', error);
       }
     }
-  }, [inputMessage, conversation, loggedInUser.id, otherUser.id]);
+  }, [inputMessage, conversation, loggedInUser?.user?.id, otherUser?.user?.id]);
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -155,18 +152,18 @@ const ChatPopup: React.FC = () => {
             {messages.map((message) => (
               <div
                 key={message._id}
-                className={`flex ${message.senderId === loggedInUser.id ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${message?.senderId === loggedInUser?.user?.id ? 'justify-end' : 'justify-start'}`}
               >
                 <div
                   className={`max-w-[70%] rounded-lg p-3 ${
-                    message.senderId === otherUser.id
+                    message?.senderId === otherUser?.user?.id
                       ? 'bg-blue-500 text-white'
                       : 'bg-gray-200 text-gray-800'
                   }`}
                 >
                   <p>{message.text}</p>
                   <span className="text-xs opacity-75 mt-1 block">
-                    {message.createdAt && formatTime(message.createdAt)}
+                    {message.createdAt && formatTime(message?.createdAt)}
                   </span>
                 </div>
               </div>

@@ -20,7 +20,7 @@ const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
-    userType: "consumer",
+    userType: "",
   });
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -40,8 +40,8 @@ const LoginPage: React.FC = () => {
     const loginData = {
       email: formData.email, // Assuming the backend expects 'email' instead of 'identifier'
       password: formData.password,
+      userType: formData.userType,
     };
-
     // Call the login thunk action
     const response = await dispatch(loginUser(loginData));
     if (typeof response.payload !== "string" && response.payload?.token) {
@@ -114,6 +114,7 @@ const LoginPage: React.FC = () => {
             onChange={handleInputChange}
             className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
           >
+            <option value="" className="hidden">Select user type</option>
             <option value="consumer">Consumer</option>
             <option value="business">Business</option>
             <option value="artisan">Artisan</option>

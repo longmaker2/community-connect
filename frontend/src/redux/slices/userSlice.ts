@@ -25,6 +25,7 @@ type UserState = {
 type LoginCredentials = {
   email: string;
   password: string;
+  userType: string;
 };
 
 type RegisterData = {
@@ -51,7 +52,13 @@ export const registerUser = createAsyncThunk<
         headers: { "Content-Type": "application/json" },
       }
     );
-    localStorage.setItem("userInfo", JSON.stringify(response.data));
+    if (response.data.user.userType === "customer") {
+      localStorage.setItem("customerInfo", JSON.stringify(response.data));
+    } else if (response.data.user.userType === "business") {
+      localStorage.setItem("businessInfo", JSON.stringify(response.data));
+    } else {
+      localStorage.setItem("artisanInfo", JSON.stringify(response.data));
+    }
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -76,7 +83,13 @@ export const loginUser = createAsyncThunk<
         headers: { "Content-Type": "application/json" },
       }
     );
-    localStorage.setItem("userInfo", JSON.stringify(response.data));
+    if (response.data.user.userType === "consumer") {
+      localStorage.setItem("consumerInfo", JSON.stringify(response.data));
+    } else if (response.data.user.userType === "business") {
+      localStorage.setItem("businessInfo", JSON.stringify(response.data));
+    } else {
+      localStorage.setItem("artisanInfo", JSON.stringify(response.data));
+    }
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -90,7 +103,9 @@ export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
   "user/logout",
   async (_, { rejectWithValue }) => {
     try {
-      localStorage.removeItem("userInfo");
+      localStorage.removeItem("customerInfo");
+      localStorage.removeItem("businessInfo");
+      localStorage.removeItem("artisanInfo");
     } catch (error) {
       return rejectWithValue("Logout failed");
     }
@@ -98,7 +113,7 @@ export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
 );
 
 // Initialize state
-const userInfoFromStorage = localStorage.getItem("userInfo");
+const userInfoFromStorage = localStorage.getItem("consumerInfo") || localStorage.getItem("businessInfo") || localStorage.getItem("artisanInfo");
 const initialState: UserState = {
   auth: userInfoFromStorage ? JSON.parse(userInfoFromStorage) : null,
   loading: false,

@@ -1,132 +1,106 @@
 import Booking from "../../models/booking.js";
-import Service from "../../models/service.js";
 
-export const createBookingCtrl = async (req, res) => {
+export const createBooking = async (req, res) => {
   try {
-    const { serviceId, providerId, date, startTime, endTime } = req.body;
-    const consumerId = req.user._id;
+    const { serviceProvider, serviceType, date, timeSlot } = req.body;
 
-    const service = await Service.findById(serviceId);
-    if (!service) {
-      return res.status(404).json({ message: "Service not found" });
+    if (!serviceProvider || !serviceType || !date || !timeSlot) {
+      return res.status(400).json({
+        message:
+          "All fields (serviceProvider, serviceType, date, timeSlot) are required.",
+      });
     }
 
-    const newBooking = await Booking.create({
-      service: serviceId,
-      consumer: consumerId,
-      provider: providerId,
+    const newBooking = new Booking({
+      serviceProvider,
+      serviceType,
       date,
-      startTime,
-      endTime,
-      status: "pending",
+      timeSlot,
     });
+    await newBooking.save();
 
-    res.status(201).json({ booking: newBooking });
+    res.status(201).json({
+      message: "Booking created successfully.",
+      booking: newBooking,
+    });
   } catch (error) {
-    console.error(error);
     res
       .status(500)
-      .json({ message: "Something went wrong while creating the booking" });
+      .json({ message: `Error creating booking: ${error.message}` });
   }
 };
 
-export const getAllBookingsCtrl = async (req, res) => {
+export const getAllBookings = async (req, res) => {
   try {
-    const userId = req.user._id;
-    const { role } = req.user;
-
-    let bookings;
-    if (role === "consumer") {
-      bookings = await Booking.find({ consumer: userId }).populate(
-        "service provider"
-      );
-    } else if (role === "provider") {
-      bookings = await Booking.find({ provider: userId }).populate(
-        "service consumer"
-      );
-    } else {
-      return res
-        .status(403)
-        .json({ message: "Unauthorized to view these bookings" });
+    const bookings = await Booking.find();
+    if (bookings.length === 0) {
+      return res.status(200).json({ message: "No bookings found." });
     }
-
-    if (!bookings.length) {
-      return res.status(404).json({ message: "No bookings found" });
-    }
-
-    res.status(200).json({ bookings });
+    res.status(200).json({
+      message: `${bookings.length} booking(s) retrieved successfully.`,
+      bookings,
+    });
   } catch (error) {
-    console.error(error);
     res
       .status(500)
-      .json({ message: "Something went wrong while fetching the bookings" });
+      .json({ message: `Error retrieving bookings: ${error.message}` });
   }
 };
 
-export const getBookingByIdCtrl = async (req, res) => {
+export const getBookingById = async (req, res) => {
   try {
-    const { id } = req.params;
-    const booking = await Booking.findById(id).populate(
-      "service consumer provider"
-    );
+    const booking = await Booking.findById(req.params.id);
 
     if (!booking) {
-      return res.status(404).json({ message: "Booking not found" });
+      return res.status(404).json({ message: "Booking not found." });
     }
 
-    res.status(200).json({ booking });
+    res.status(200).json({
+      message: "Booking retrieved successfully.",
+      booking,
+    });
   } catch (error) {
-    console.error(error);
     res
       .status(500)
-      .json({ message: "Something went wrong while fetching the booking" });
+      .json({ message: `Error retrieving booking: ${error.message}` });
   }
 };
 
-export const updateBookingStatusCtrl = async (req, res) => {
+export const updateBooking = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    const validStatuses = ["pending", "confirmed", "cancelled", "completed"];
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({ message: "Invalid status" });
-    }
-
     const updatedBooking = await Booking.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true }
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
     );
 
     if (!updatedBooking) {
-      return res.status(404).json({ message: "Booking not found" });
+      return res.status(404).json({ message: "Booking not found." });
     }
 
-    res.status(200).json({ booking: updatedBooking });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Something went wrong while updating the booking status",
+    res.status(200).json({
+      message: "Booking updated successfully.",
+      booking: updatedBooking,
     });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: `Error updating booking: ${error.message}` });
   }
 };
 
-export const deleteBookingCtrl = async (req, res) => {
+export const deleteBooking = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const deletedBooking = await Booking.findByIdAndDelete(id);
+    const deletedBooking = await Booking.findByIdAndDelete(req.params.id);
 
     if (!deletedBooking) {
-      return res.status(404).json({ message: "Booking not found" });
+      return res.status(404).json({ message: "Booking not found." });
     }
 
-    res.status(200).json({ message: "Booking successfully deleted" });
+    res.status(200).json({ message: "Booking deleted successfully." });
   } catch (error) {
-    console.error(error);
     res
       .status(500)
-      .json({ message: "Something went wrong while deleting the booking" });
+      .json({ message: `Error deleting booking: ${error.message}` });
   }
 };

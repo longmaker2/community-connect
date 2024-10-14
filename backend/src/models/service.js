@@ -1,24 +1,28 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const serviceSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },
-    description: String,
-    price: { type: Number, required: true },
-    duration: { type: Number, required: true },
-    serviceType: { type: String, required: true }, // e.g., "Cleaning", "Repair", "Consultation"
-    availability: {
-      type: [String], // Array of available days, e.g., ['Monday', 'Tuesday']
-      default: [],
+    businessName: { type: String, required: true },
+    serviceTitle: { type: String, required: true },
+    imageUrl: { type: String, required: true },
+    description: { type: String, required: true },
+    pricing: { type: Number, required: true },
+    availability: { type: String, required: true },
+    location: { type: String, required: true },
+    bio: { type: String, required: true },
+    serviceCategory: { type: String, required: true },
+    email: { type: String, required: true },
+    phone: { type: String, required: true },
+    website: { type: String },
+    socialLinks: { type: String },
+    provider: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
-    location: {
-      city: { type: String, required: true }, // e.g., "New York", "Nairobi"
-      country: { type: String, required: true }, // e.g., "USA", "Kenya"
-    },
-    provider: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   },
   { timestamps: true }
 );
 
-const Service = mongoose.model('Service', serviceSchema);
+const Service = mongoose.model("Service", serviceSchema);
 export default Service;

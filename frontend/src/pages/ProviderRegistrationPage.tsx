@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import {
@@ -55,14 +56,23 @@ const ProviderRegistrationPage: React.FC = () => {
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
       };
-      reader.readAsDataURL(file); // Read the file as a data URL to display it
+      reader.readAsDataURL(file);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Registration Successful! You will be contacted soon.");
-    navigate("/"); // Redirect to home page after submission
+    try {
+      await axios.post("http://localhost:5000/api/service", {
+        ...formData,
+        imageUrl: imagePreview, // Include the image preview URL if needed
+      });
+      alert("Registration Successful! You will be contacted soon.");
+      navigate("/"); // Redirect to home page after submission
+    } catch (error) {
+      console.error("Registration failed:", error);
+      alert("Registration failed. Please try again."); // Show an error message
+    }
   };
 
   return (
@@ -76,7 +86,6 @@ const ProviderRegistrationPage: React.FC = () => {
           onSubmit={handleSubmit}
           className="bg-white p-8 rounded-lg shadow-md animate-slideUp"
         >
-          {/* Business Name */}
           <div className="mb-4 animate-fadeIn delay-100">
             <label className="block text-gray-700 font-semibold mb-2">
               Business Name
@@ -96,8 +105,6 @@ const ProviderRegistrationPage: React.FC = () => {
               />
             </div>
           </div>
-
-          {/* Service Title */}
           <div className="mb-4 animate-fadeIn delay-200">
             <label className="block text-gray-700 font-semibold mb-2">
               Service Title
@@ -118,7 +125,6 @@ const ProviderRegistrationPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Image Upload */}
           <div className="mb-4 animate-fadeIn delay-300">
             <label className="block text-gray-700 font-semibold mb-2">
               Upload Service Image
@@ -146,8 +152,6 @@ const ProviderRegistrationPage: React.FC = () => {
               </div>
             )}
           </div>
-
-          {/* Description */}
           <div className="mb-4 animate-fadeIn delay-400">
             <label className="block text-gray-700 font-semibold mb-2">
               Service Description
@@ -167,8 +171,6 @@ const ProviderRegistrationPage: React.FC = () => {
               />
             </div>
           </div>
-
-          {/* Pricing */}
           <div className="mb-4 animate-fadeIn delay-500">
             <label className="block text-gray-700 font-semibold mb-2">
               Pricing
@@ -188,8 +190,6 @@ const ProviderRegistrationPage: React.FC = () => {
               />
             </div>
           </div>
-
-          {/* Availability */}
           <div className="mb-4 animate-fadeIn delay-600">
             <label className="block text-gray-700 font-semibold mb-2">
               Availability
@@ -209,8 +209,6 @@ const ProviderRegistrationPage: React.FC = () => {
               />
             </div>
           </div>
-
-          {/* Location */}
           <div className="mb-4 animate-fadeIn delay-700">
             <label className="block text-gray-700 font-semibold mb-2">
               Location
@@ -225,16 +223,14 @@ const ProviderRegistrationPage: React.FC = () => {
                 value={formData.location}
                 onChange={handleChange}
                 className="w-full pl-12 px-3 py-2 border rounded-md focus:outline-none focus:border-gray-600 transition duration-300 ease-in-out transform hover:scale-105"
-                placeholder="Enter your service location (e.g., city, region)"
+                placeholder="Enter your service area"
                 required
               />
             </div>
           </div>
-
-          {/* Bio */}
           <div className="mb-4 animate-fadeIn delay-800">
             <label className="block text-gray-700 font-semibold mb-2">
-              About You / Bio
+              Bio
             </label>
             <div className="relative">
               <span className="absolute top-2.5 left-3">
@@ -251,8 +247,6 @@ const ProviderRegistrationPage: React.FC = () => {
               />
             </div>
           </div>
-
-          {/* Service Category */}
           <div className="mb-4 animate-fadeIn delay-900">
             <label className="block text-gray-700 font-semibold mb-2">
               Service Category
@@ -275,11 +269,9 @@ const ProviderRegistrationPage: React.FC = () => {
               </select>
             </div>
           </div>
-
-          {/* Email */}
           <div className="mb-4 animate-fadeIn delay-1000">
             <label className="block text-gray-700 font-semibold mb-2">
-              Email Address
+              Email Address 
             </label>
             <div className="relative">
               <span className="absolute top-2.5 left-3">
@@ -296,8 +288,6 @@ const ProviderRegistrationPage: React.FC = () => {
               />
             </div>
           </div>
-
-          {/* Phone Number */}
           <div className="mb-4 animate-fadeIn delay-1100">
             <label className="block text-gray-700 font-semibold mb-2">
               Phone Number
@@ -317,8 +307,6 @@ const ProviderRegistrationPage: React.FC = () => {
               />
             </div>
           </div>
-
-          {/* Website URL */}
           <div className="mb-4 animate-fadeIn delay-1200">
             <label className="block text-gray-700 font-semibold mb-2">
               Website
@@ -328,17 +316,15 @@ const ProviderRegistrationPage: React.FC = () => {
                 <GlobeAltIcon className="h-6 w-6 text-gray-700" />
               </span>
               <input
-                type="text"
+                type="url"
                 name="website"
                 value={formData.website}
                 onChange={handleChange}
                 className="w-full pl-12 px-3 py-2 border rounded-md focus:outline-none focus:border-gray-600 transition duration-300 ease-in-out transform hover:scale-105"
-                placeholder="Enter your website URL (optional)"
+                placeholder="Enter your website URL"
               />
             </div>
           </div>
-
-          {/* Social Media Links */}
           <div className="mb-4 animate-fadeIn delay-1300">
             <label className="block text-gray-700 font-semibold mb-2">
               Social Media Links
@@ -353,19 +339,17 @@ const ProviderRegistrationPage: React.FC = () => {
                 value={formData.socialLinks}
                 onChange={handleChange}
                 className="w-full pl-12 px-3 py-2 border rounded-md focus:outline-none focus:border-gray-600 transition duration-300 ease-in-out transform hover:scale-105"
-                placeholder="Enter your social media links (optional)"
+                placeholder="Enter your social media links"
               />
             </div>
           </div>
 
-          <div className="text-center">
-            <button
-              type="submit"
-              className="bg-gray-800 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition-transform transform hover:scale-110 duration-300"
-            >
-              Submit Registration
-            </button>
-          </div>
+          <button
+            type="submit"
+            className="w-full bg-gray-800 text-white font-semibold py-2 rounded-md hover:bg-gray-600 transition duration-300 ease-in-out"
+          >
+            Register
+          </button>
         </form>
       </div>
       <Footer />

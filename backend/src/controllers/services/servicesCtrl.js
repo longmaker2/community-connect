@@ -6,7 +6,7 @@ export const createServiceCtrl = async (req, res) => {
     const { name, description, duration, price, serviceType, availability, location } = req.body;
 
     const service = await Service.create({
-      name,
+      businessName:name,
       description,
       duration,
       price,

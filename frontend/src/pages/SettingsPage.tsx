@@ -107,7 +107,7 @@ const SettingsPage: React.FC = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-100 pb-8">
+      <div className="min-h-screen bg-gray-100">
         <Navbar />
         <h1 className="text-4xl font-bold text-gray-800 mb-6 text-center mt-8">
           Settings
@@ -253,9 +253,8 @@ const SettingsPage: React.FC = () => {
               />
             </div>
           </div>
-
-          <Footer />
         </div>
+        <Footer />
         <ToastContainer /> {/* Include ToastContainer here */}
       </div>
     </>

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useAppDispatch } from "../redux/store/store";
 import { useNavigate, Link } from "react-router-dom";
-import { loginSuccess } from "../features/authSlice";
 import {
   UserIcon,
   EnvelopeIcon,
@@ -9,30 +8,70 @@ import {
   UsersIcon,
   CheckIcon,
 } from "@heroicons/react/24/outline";
+import { registerUser } from "../redux/slices/userSlice";
+
+interface FormData {
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword?: string;
+  userType: string;
+  address: string;
+}
 
 const RegisterPage: React.FC = () => {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [userType, setUserType] = useState("consumer");
+  const [formData, setFormData] = useState<FormData>({
+    firstName: "",
+    lastName: "",
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    userType: "consumer",
+    address: "",
+  });
   const [passwordError, setPasswordError] = useState("");
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (password !== confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       setPasswordError("Passwords do not match");
       return;
     }
+    console.log(formData);
+    const dataToSubmit = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      username: formData.username,
+      email: formData.email,
+      password: formData.password,
+      userType: formData.userType,
+      address: formData.address, // Add a default address or get it from formData
+    };
 
-    const fakeToken = "123456";
-    dispatch(loginSuccess({ email, token: fakeToken, userType }));
-    navigate("/");
+    // Call the register thunk action
+    const response = await dispatch(registerUser(dataToSubmit as FormData));
+    if (typeof response.payload !== "string" && response.payload?.user) {
+      navigate("/");
+    } else {
+      console.log(response);
+      window.alert(response.payload);
+    }
   };
 
   return (
@@ -51,8 +90,9 @@ const RegisterPage: React.FC = () => {
           <input
             type="text"
             id="firstName"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
+            name="firstName"
+            value={formData.firstName}
+            onChange={handleInputChange}
             className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
             placeholder="Enter your first name"
             required
@@ -71,8 +111,9 @@ const RegisterPage: React.FC = () => {
           <input
             type="text"
             id="lastName"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
+            name="lastName"
+            value={formData.lastName}
+            onChange={handleInputChange}
             className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
             placeholder="Enter your last name"
             required
@@ -91,8 +132,9 @@ const RegisterPage: React.FC = () => {
           <input
             type="text"
             id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            name="username"
+            value={formData.username}
+            onChange={handleInputChange}
             className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
             placeholder="Enter a unique username"
             required
@@ -111,8 +153,9 @@ const RegisterPage: React.FC = () => {
           <input
             type="email"
             id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
             className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
             placeholder="Enter your email address"
             required
@@ -131,8 +174,9 @@ const RegisterPage: React.FC = () => {
           <input
             type="password"
             id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            name="password"
+            value={formData.password}
+            onChange={handleInputChange}
             className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
             placeholder="Enter a secure password"
             required
@@ -151,8 +195,9 @@ const RegisterPage: React.FC = () => {
           <input
             type="password"
             id="confirmPassword"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleInputChange}
             className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
             placeholder="Re-enter your password"
             required
@@ -163,6 +208,27 @@ const RegisterPage: React.FC = () => {
         {passwordError && (
           <p className="text-red-500 text-sm mb-4">{passwordError}</p>
         )}
+
+        {/* Address */}
+        <div className="mb-4">
+          <label
+            htmlFor="address"
+            className="block text-lg mb-2 flex items-center"
+          >
+            <UserIcon className="h-5 w-5 mr-2" />
+            Address
+          </label>
+          <input
+            type="text"
+            id="address"
+            name="address"
+            value={formData.address}
+            onChange={handleInputChange}
+            className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
+            placeholder="Enter your Address"
+            required
+          />
+        </div>
 
         {/* User Type */}
         <div className="mb-4">
@@ -175,8 +241,9 @@ const RegisterPage: React.FC = () => {
           </label>
           <select
             id="userType"
-            value={userType}
-            onChange={(e) => setUserType(e.target.value)}
+            name="userType"
+            value={formData.userType}
+            onChange={handleInputChange}
             className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
           >
             <option value="consumer">Consumer</option>

@@ -1,9 +1,7 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface BookingState {
   date: Date | null;
-  serviceProvider: string | null;
-  serviceType: string | null;
   timeSlot: string | null;
   loading: boolean;
   error: string | null;
@@ -11,25 +9,17 @@ interface BookingState {
 
 const initialState: BookingState = {
   date: null,
-  serviceProvider: null,
-  serviceType: null,
   timeSlot: null,
   loading: false,
   error: null,
 };
 
 const bookingSlice = createSlice({
-  name: 'booking',
+  name: "booking",
   initialState,
   reducers: {
     setBookingDate: (state, action: PayloadAction<Date | null>) => {
       state.date = action.payload;
-    },
-    setServiceProvider: (state, action: PayloadAction<string>) => {
-      state.serviceProvider = action.payload;
-    },
-    setServiceType: (state, action: PayloadAction<string>) => {
-      state.serviceType = action.payload;
     },
     setTimeSlot: (state, action: PayloadAction<string>) => {
       state.timeSlot = action.payload;
@@ -45,8 +35,6 @@ const bookingSlice = createSlice({
     },
     clearBooking: (state) => {
       state.date = null;
-      state.serviceProvider = null;
-      state.serviceType = null;
       state.timeSlot = null;
       state.error = null;
     },
@@ -55,8 +43,6 @@ const bookingSlice = createSlice({
 
 export const {
   setBookingDate,
-  setServiceProvider,
-  setServiceType,
   setTimeSlot,
   addBooking,
   setLoading,

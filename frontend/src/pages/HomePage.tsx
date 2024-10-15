@@ -10,6 +10,7 @@ import {
   BriefcaseIcon,
   StarIcon,
   ArrowRightIcon,
+  InboxIcon,
 } from "@heroicons/react/24/outline";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -19,6 +20,10 @@ import { getServices, Service } from "../redux/slices/servicesSlice";
 const HomePage: React.FC = () => {
   const [allServices, setAllServices] = useState<Service[]>([]);
   const [servicesWithAvatars, setServicesWithAvatars] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState(""); // New state for search input
+  const [selectedType, setSelectedType] = useState(""); // State for service type
+  const [location, setLocation] = useState(""); // State for location
+  const [availability, setAvailability] = useState("");
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { loading } = useAppSelector((state) => state.service);
@@ -55,13 +60,34 @@ const HomePage: React.FC = () => {
       generateAvatars();
     }
   }, [allServices]);
+
+  const filterServices = () => {
+    return servicesWithAvatars.filter((service) => {
+      const matchesType = selectedType ? service.type === selectedType : true;
+      const matchesLocation = location
+        ? service.location.includes(location)
+        : true;
+      const matchesAvailability = availability
+        ? service.availability.includes(availability)
+        : true;
+      const matchesSearchTerm = service.businessName
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+      return (
+        matchesType &&
+        matchesLocation &&
+        matchesAvailability &&
+        matchesSearchTerm
+      );
+    });
+  };
   return (
     <>
       <Navbar />
       {/* Hero Section */}
-      <section className="text-center py-20 px-6 bg-gray-100 animate-fadeIn">
+      {/* <section className="text-center py-20 px-6 bg-gray-100 animate-fadeIn">
         <h1 className="text-5xl font-bold text-gray-800 mb-4 animate-slideDown">
-          {/* Adding the Typed component for typing effect */}
           <Typed
             strings={["Welcome to Community Connect"]}
             typeSpeed={80}
@@ -78,6 +104,55 @@ const HomePage: React.FC = () => {
             type="text"
             placeholder="Search for services..."
             className="p-2 w-80 text-lg rounded-l-md border border-gray-300 focus:border-gray-800 focus:outline-none transition-transform transform hover:scale-105 duration-300"
+          />
+          <button className="bg-gray-800 text-white hover:bg-gray-600 p-2 rounded-r-md transition-transform transform hover:scale-105 duration-300">
+            <MagnifyingGlassIcon className="h-5 w-5 inline mr-2" />
+            Search
+          </button>
+        </div>
+      </section> */}
+
+      <section className="text-center py-20 px-6 bg-gray-100 animate-fadeIn">
+        <h1 className="text-5xl font-bold text-gray-800 mb-4 animate-slideDown">
+          <Typed
+            strings={["Welcome to Community Connect"]}
+            typeSpeed={80}
+            backDelay={3000}
+            backSpeed={50}
+            loop={true}
+          />
+        </h1>
+        <p className="text-xl text-gray-600 mb-8 animate-slideDown delay-100">
+          Find local businesses and services near you
+        </p>
+        <div className="md:flex flex-wrap md:pt-0 pt-6 justify-center mt-6">
+          <input
+            type="text"
+            placeholder="Search for services..."
+            className="p-2 w-64 text-lg rounded-l-md border border-gray-300 focus:border-gray-800 focus:outline-none transition-transform transform hover:scale-105 duration-300"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)} // Update search term
+          />
+          <input
+            type="text"
+            placeholder="Service Type..."
+            className="p-2 w-64 text-lg rounded-l-md border border-gray-300 focus:border-gray-800 focus:outline-none transition-transform transform hover:scale-105 duration-300"
+            value={selectedType}
+            onChange={(e) => setSelectedType(e.target.value)} // Update selected type
+          />
+          <input
+            type="text"
+            placeholder="Location..."
+            className="p-2 w-64 text-lg rounded-l-md border border-gray-300 focus:border-gray-800 focus:outline-none transition-transform transform hover:scale-105 duration-300"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)} // Update location
+          />
+          <input
+            type="text"
+            placeholder="Availability..."
+            className="p-2 w-64 text-lg rounded-l-md border border-gray-300 focus:border-gray-800 focus:outline-none transition-transform transform hover:scale-105 duration-300"
+            value={availability}
+            onChange={(e) => setAvailability(e.target.value)} // Update availability
           />
           <button className="bg-gray-800 text-white hover:bg-gray-600 p-2 rounded-r-md transition-transform transform hover:scale-105 duration-300">
             <MagnifyingGlassIcon className="h-5 w-5 inline mr-2" />
@@ -120,7 +195,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Services Section */}
-      <section className="py-16 px-4 bg-gray-100 animate-fadeIn">
+      {/* <section className="py-16 px-4 bg-gray-100 animate-fadeIn">
         <h2 className="text-4xl font-bold mb-8 text-center">Our Services</h2>
         {loading ? (
           <div
@@ -165,6 +240,64 @@ const HomePage: React.FC = () => {
                 </Link>
               </div>
             ))}
+          </div>
+        )}
+      </section> */}
+
+      <section className="py-16 px-4 bg-gray-100 animate-fadeIn">
+        <h2 className="text-4xl font-bold mb-8 text-center">Our Services</h2>
+        {loading ? (
+          <div
+            className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+            role="status"
+          ></div>
+        ) : (
+          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6">
+            {filterServices().length > 0 ? (
+              filterServices().map((service) => (
+                <div
+                  key={service._id}
+                  className="p-4 bg-blue-50 rounded-lg shadow-md transform hover:scale-105 transition-transform duration-300"
+                >
+                  <img
+                    src={service.image}
+                    alt={service.name}
+                    className="w-full h-32 object-cover rounded-lg"
+                  />
+                  <h3 className="text-lg font-semibold mb-1">
+                    {service.businessName}
+                  </h3>
+                  <p className="text-gray-600 text-sm line-clamp-2">
+                    {service.description}
+                  </p>
+                  <div className="flex items-center my-2">
+                    <StarIcon className="h-5 w-5 text-yellow-500" />
+                    <span className="ml-1 text-gray-600">
+                      {service?.rating} / 5.0
+                    </span>
+                  </div>
+                  {service?.isFeatured && (
+                    <span className="text-white bg-green-500 px-2 py-1 mx-1 rounded-md text-xs">
+                      Featured
+                    </span>
+                  )}
+
+                  <Link
+                    to={`/booking/${service._id}`}
+                    state={service}
+                    className="inline-block mt-4 bg-gray-800 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition-transform transform hover:scale-105 duration-300"
+                  >
+                    Book Now
+                    <ArrowRightIcon className="h-5 w-5 inline ml-2" />
+                  </Link>
+                </div>
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center text-center">
+                <InboxIcon className="h-16 w-16 text-black mb-4 text-base " />
+                <p className="text-base text-gray-800">No available service.</p>
+              </div>
+            )}
           </div>
         )}
       </section>

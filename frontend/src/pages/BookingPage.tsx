@@ -159,12 +159,15 @@ const BookingPage: React.FC = () => {
                 <option value={4}>4 Stars</option>
                 <option value={5}>5 Stars</option>
               </select>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleProfilePictureChange}
-                className="w-full p-2 border rounded-md mb-2"
-              />
+              <span>
+                <p className="py-3 font-semibold">Add your profile pic(optional)</p>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfilePictureChange}
+                  className="w-full p-2 border rounded-md mb-2"
+                />
+              </span>
               <button
                 onClick={handleSubmitReview}
                 className="bg-gray-800 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition-transform transform hover:scale-110 duration-300"

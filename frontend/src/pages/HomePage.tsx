@@ -41,14 +41,28 @@ const HomePage: React.FC = () => {
     async function generateAvatars() {
       const servicesWithAvatars = await Promise.all(
         allServices.map(async (service) => {
-          const avatarResponse = await fetch(
-            `https://avatar.iran.liara.run/public/boy?username=${service?.businessName}`
-          );
+          const [avatarResponse, reviewsResponse] = await Promise.all([
+            fetch(
+              `https://avatar.iran.liara.run/public/boy?username=${service.businessName}`
+            ),
+            fetch(`http://localhost:5000/api/reviews/service/${service._id}`),
+          ]);
+          const reviews = await reviewsResponse.json();
+          const ratingValue =
+            reviews?.length > 0
+              ? (
+                  reviews.reduce(
+                    (acc: number, review: any) => acc + review.rating,
+                    0
+                  ) / reviews.length
+                ).toFixed(1)
+              : 0;
+
           const avatarUrl = avatarResponse.url;
           return {
             ...service,
             image: avatarUrl,
-            rating: (Math.random() * 2 + 3).toFixed(1),
+            rating: ratingValue,
             isFeatured: Math.random() > 0.5,
           };
         })
@@ -61,6 +75,7 @@ const HomePage: React.FC = () => {
     }
   }, [allServices]);
 
+  //console.log(servicesWithAvatars)
   const filterServices = () => {
     return servicesWithAvatars.filter((service) => {
       const matchesType = selectedType ? service.type === selectedType : true;
@@ -82,35 +97,38 @@ const HomePage: React.FC = () => {
       );
     });
   };
+
+  const renderStars = (rating: number) => {
+    const totalStars = 5;
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+
+    return (
+      <div className="flex items-center">
+        {[...Array(fullStars)].map((_, index) => (
+          <StarIcon key={index} className="h-5 w-5 text-yellow-500" />
+        ))}
+        {hasHalfStar && (
+          <StarIcon
+            className="h-5 w-5 text-yellow-500"
+            style={{ clipPath: "inset(0 50% 0 0)" }}
+          />
+        )}
+        {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map(
+          (_, index) => (
+            <StarIcon
+              key={fullStars + index}
+              className="h-5 w-5 text-gray-300"
+            />
+          )
+        )}
+        <span className="ml-1 text-gray-600">{rating.toFixed(1)} / 5.0</span>
+      </div>
+    );
+  };
   return (
     <>
       <Navbar />
-      {/* Hero Section */}
-      {/* <section className="text-center py-20 px-6 bg-gray-100 animate-fadeIn">
-        <h1 className="text-5xl font-bold text-gray-800 mb-4 animate-slideDown">
-          <Typed
-            strings={["Welcome to Community Connect"]}
-            typeSpeed={80}
-            backDelay={3000}
-            backSpeed={50}
-            loop={true}
-          />
-        </h1>
-        <p className="text-xl text-gray-600 mb-8 animate-slideDown delay-100">
-          Find local businesses and services near you
-        </p>
-        <div className="flex justify-center mt-6">
-          <input
-            type="text"
-            placeholder="Search for services..."
-            className="p-2 w-80 text-lg rounded-l-md border border-gray-300 focus:border-gray-800 focus:outline-none transition-transform transform hover:scale-105 duration-300"
-          />
-          <button className="bg-gray-800 text-white hover:bg-gray-600 p-2 rounded-r-md transition-transform transform hover:scale-105 duration-300">
-            <MagnifyingGlassIcon className="h-5 w-5 inline mr-2" />
-            Search
-          </button>
-        </div>
-      </section> */}
 
       <section className="text-center py-20 px-6 bg-gray-100 animate-fadeIn">
         <h1 className="text-5xl font-bold text-gray-800 mb-4 animate-slideDown">
@@ -161,99 +179,18 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 px-6 bg-white animate-fadeIn">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-          <div className="transform hover:scale-105 transition-transform duration-300">
-            <CalendarDaysIcon className="h-12 w-12 mx-auto text-gray-800 mb-4" />
-            <h3 className="text-2xl font-semibold mb-2 text-gray-800">
-              Book Appointments
-            </h3>
-            <p className="text-gray-600">
-              Schedule services quickly with our booking system.
-            </p>
-          </div>
-          <div className="transform hover:scale-105 transition-transform duration-300">
-            <ChatBubbleLeftRightIcon className="h-12 w-12 mx-auto text-gray-800 mb-4" />
-            <h3 className="text-2xl font-semibold mb-2 text-gray-800">
-              Real-Time Chat
-            </h3>
-            <p className="text-gray-600">
-              Chat directly with service providers for inquiries and updates.
-            </p>
-          </div>
-          <div className="transform hover:scale-105 transition-transform duration-300">
-            <BriefcaseIcon className="h-12 w-12 mx-auto text-gray-800 mb-4" />
-            <h3 className="text-2xl font-semibold mb-2 text-gray-800">
-              Discover Local Services
-            </h3>
-            <p className="text-gray-600">
-              Find businesses, artisans, and service providers near you.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Services Section */}
-      {/* <section className="py-16 px-4 bg-gray-100 animate-fadeIn">
-        <h2 className="text-4xl font-bold mb-8 text-center">Our Services</h2>
-        {loading ? (
-          <div
-            className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
-            role="status"
-          ></div>
-        ) : (
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6">
-            {servicesWithAvatars.map((service) => (
-              <div
-                key={service._id}
-                className="p-4 bg-blue-50 rounded-lg shadow-md transform hover:scale-105 transition-transform duration-300"
-              >
-                <img
-                  src={service.image}
-                  alt={service.name}
-                  className="w-full h-32 object-cover rounded-lg"
-                />
-                <h3 className="text-lg font-semibold mb-1">
-                  {service.businessName}
-                </h3>
-                <p className="text-gray-600 text-sm line-clamp-2">
-                  {service.description}
-                </p>
-                <div className="flex items-center my-2">
-                  <StarIcon className="h-5 w-5 text-yellow-500" />
-                  <span className="ml-1 text-gray-600">
-                    {service?.rating} / 5.0
-                  </span>
-                </div>
-                {service?.isFeatured && (
-                  <span className="text-white bg-green-500 px-2 py-1 mx-1 rounded-md text-xs">
-                    Featured
-                  </span>
-                )}
-                <Link
-                  to={`/booking/${service._id}`}
-                  state={service}
-                  className="inline-block mt-4 bg-gray-800 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition-transform transform hover:scale-110 duration-300"
-                >
-                  Book Now <ArrowRightIcon className="inline h-5 w-5 ml-1" />
-                </Link>
-              </div>
-            ))}
-          </div>
-        )}
-      </section> */}
-
       <section className="py-16 px-4 bg-gray-100 animate-fadeIn">
         <h2 className="text-4xl font-bold mb-8 text-center">Our Services</h2>
         {loading ? (
-          <div
-            className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
-            role="status"
-          ></div>
+          <div className="flex items-center justify-center">
+            <div
+              className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+              role="status"
+            ></div>
+          </div>
         ) : (
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6">
-            {filterServices().length > 0 ? (
+            {filterServices() ? (
               filterServices().map((service) => (
                 <div
                   key={service._id}
@@ -271,10 +208,7 @@ const HomePage: React.FC = () => {
                     {service.description}
                   </p>
                   <div className="flex items-center my-2">
-                    <StarIcon className="h-5 w-5 text-yellow-500" />
-                    <span className="ml-1 text-gray-600">
-                      {service?.rating} / 5.0
-                    </span>
+                    {renderStars(parseFloat(service.rating))}
                   </div>
                   {service?.isFeatured && (
                     <span className="text-white bg-green-500 px-2 py-1 mx-1 rounded-md text-xs">

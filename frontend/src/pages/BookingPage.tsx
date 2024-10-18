@@ -58,7 +58,6 @@ const BookingPage: React.FC = () => {
         const response = await axios.get(
           `http://localhost:5000/api/reviews/service/${serviceId}`
         );
-        // console.log("Fetched reviews:", response.data);
         setReviews(response.data);
       } catch (error) {
         console.error("Error fetching reviews:", error);

@@ -7,6 +7,7 @@ import Footer from "../components/Footer";
 import Booking from "../components/Booking";
 import axios from "axios";
 import { Spin } from "antd";
+import { useAppSelector } from "../redux/store/store";
 
 interface Review {
   name: string;
@@ -69,6 +70,8 @@ const BookingPage: React.FC = () => {
     fetchReviews();
   }, [serviceId]);
 
+  const { auth } = useAppSelector((state) => state.user);
+  const loginUser = auth?.user;
   const handleProfilePictureChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -108,7 +111,6 @@ const BookingPage: React.FC = () => {
       console.error("Error submitting review:", error);
     }
   };
-
   return (
     <>
       <Navbar />
@@ -160,7 +162,9 @@ const BookingPage: React.FC = () => {
                 <option value={5}>5 Stars</option>
               </select>
               <span>
-                <p className="py-3 font-semibold">Add your profile pic(optional)</p>
+                <p className="py-3 font-semibold">
+                  Add your profile pic(optional)
+                </p>
                 <input
                   type="file"
                   accept="image/*"
@@ -227,7 +231,13 @@ const BookingPage: React.FC = () => {
           </div>
         </div>
       </div>
-      <ChatPopup />
+      {loginUser && loginUser.userType === "consumer" && (
+        <ChatPopup
+          userId={loginUser.id}
+          otherUserId={state.provider}
+          isBusinessUser={false}
+        />
+      )}
 
       <Footer />
     </>

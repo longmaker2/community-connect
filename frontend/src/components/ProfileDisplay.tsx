@@ -1,10 +1,40 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
+import { useAppSelector } from "../redux/store/store";
+import axios from "axios";
+import ChatPopup from "./Chatting";
+
+interface Conversation {
+  _id: string;
+  members: string[];
+}
 
 const ProfileDisplay: React.FC<{ onEdit: () => void }> = ({ onEdit }) => {
   const profile = useSelector((state: RootState) => state.profile);
+  const [allConversations, setAllConversations] = useState<Conversation[]>([]);
+  const [selectedConversation, setSelectedConversation] = useState<
+    string | null
+  >(null);
+  const { auth } = useAppSelector((state) => state.user);
+  const loginUser = auth?.user;
 
+  useEffect(() => {
+    async function fetchConversations(userId: string) {
+      try {
+        const response = await axios.get(
+          `http://localhost:5000/api/conversation/${userId}`
+        );
+        setAllConversations(response.data);
+      } catch (error) {
+        console.error("Error fetching conversations:", error);
+      }
+    }
+
+    if (loginUser?.userType === "business") {
+      fetchConversations(loginUser.id);
+    }
+  }, [loginUser]);
   return (
     <div className="profile-display max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md">
       {/* Profile Image */}
@@ -74,7 +104,36 @@ const ProfileDisplay: React.FC<{ onEdit: () => void }> = ({ onEdit }) => {
           ))}
         </div>
       </div>
+      {loginUser?.userType === "business" && (
+        <div className="absolute top-20 right-0">
+          <h3 className="text-xl font-bold mb-4">Conversations</h3>
+          <div className="space-y-2">
+            {allConversations.map((conversation) => (
+              <button
+                key={conversation._id}
+                onClick={() =>
+                  setSelectedConversation(
+                    conversation.members.find((id) => id !== loginUser.id) ||
+                      null
+                  )
+                }
+                className="w-full text-left p-2 bg-gray-100 rounded-md hover:bg-gray-200"
+              >
+                Conversation with User{" "}
+                {conversation.members.find((id) => id !== loginUser.id)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
+      {loginUser?.userType === "business" && selectedConversation && (
+        <ChatPopup
+          userId={loginUser.id}
+          otherUserId={selectedConversation}
+          isBusinessUser={true}
+        />
+      )}
       <button
         onClick={onEdit}
         className="w-full bg-gray-800 text-white p-3 rounded-md hover:bg-gray-600 transition-transform hover:scale-105"

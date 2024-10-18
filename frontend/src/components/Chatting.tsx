@@ -74,7 +74,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
 
     try {
       const conversationResp = await fetch(
-        `http://localhost:5000/api/conversation/new/${userId}/${otherUserId}`
+        `http://localhost:5000/api/conversation/our/${userId}/${otherUserId}`
       );
       const conversationData = await conversationResp.json();
       setConversation(conversationData);

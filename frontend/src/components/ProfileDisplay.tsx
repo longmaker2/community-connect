@@ -9,9 +9,9 @@ const ProfileDisplay: React.FC<{ onEdit: () => void }> = ({ onEdit }) => {
     <div className="profile-display max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md">
       {/* Profile Image */}
       <div className="mb-6 text-center">
-        {profile.profileImage ? (
+        {profile?.profileImage ? (
           <img
-            src={URL.createObjectURL(profile.profileImage)}
+            src={URL.createObjectURL(profile?.profileImage)}
             alt="Profile"
             className="w-32 h-32 object-cover rounded-full mx-auto border mb-4"
           />
@@ -24,38 +24,38 @@ const ProfileDisplay: React.FC<{ onEdit: () => void }> = ({ onEdit }) => {
       <div className="mb-6">
         <h3 className="text-xl font-bold mb-4">Profile Information</h3>
         <p>
-          <strong>Services:</strong> {profile.services}
+          <strong>Services:</strong> {profile?.services}
         </p>
         <p>
-          <strong>Pricing:</strong> {profile.pricing}
+          <strong>Pricing:</strong> {profile?.pricing}
         </p>
         <p>
-          <strong>Availability:</strong> {profile.availability}
+          <strong>Availability:</strong> {profile?.availability}
         </p>
         <p>
-          <strong>Location:</strong> {profile.location}
+          <strong>Location:</strong> {profile?.location}
         </p>
         <p>
-          <strong>Bio:</strong> {profile.bio}
+          <strong>Bio:</strong> {profile?.bio}
         </p>
       </div>
 
       {/* Social Media Links */}
       <div className="mb-6">
         <h3 className="text-xl font-bold mb-4">Social Media</h3>
-        {profile.socialLinks?.facebook && (
+        {profile?.socialLinks?.facebook && (
           <p>
-            <strong>Facebook:</strong> {profile.socialLinks.facebook}
+            <strong>Facebook:</strong> {profile?.socialLinks.facebook}
           </p>
         )}
-        {profile.socialLinks?.instagram && (
+        {profile?.socialLinks?.instagram && (
           <p>
-            <strong>Instagram:</strong> {profile.socialLinks.instagram}
+            <strong>Instagram:</strong> {profile?.socialLinks.instagram}
           </p>
         )}
-        {profile.socialLinks?.linkedin && (
+        {profile?.socialLinks?.linkedin && (
           <p>
-            <strong>LinkedIn:</strong> {profile.socialLinks.linkedin}
+            <strong>LinkedIn:</strong> {profile?.socialLinks.linkedin}
           </p>
         )}
       </div>
@@ -64,7 +64,7 @@ const ProfileDisplay: React.FC<{ onEdit: () => void }> = ({ onEdit }) => {
       <div className="mb-6">
         <h3 className="text-xl font-bold mb-4">Portfolio</h3>
         <div className="grid grid-cols-2 gap-4">
-          {profile.portfolioImages?.map((image, index) => (
+          {profile?.portfolioImages?.map((image, index) => (
             <img
               key={index}
               src={URL.createObjectURL(image)}

@@ -3,7 +3,7 @@ import axios from "axios";
 import { baseURL } from "../../utils/baseURL";
 
 export type Service = {
-  id: string;
+  _id: string;
   businessName: string;
   description: string;
   price: number;

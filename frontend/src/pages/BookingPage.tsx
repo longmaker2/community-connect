@@ -8,6 +8,7 @@ import Booking from "../components/Booking";
 import axios from "axios";
 import { Spin } from "antd";
 import { useAppSelector } from "../redux/store/store";
+import { baseURL } from "../utils/baseURL"; // Ensure the correct baseURL is used
 
 interface Review {
   name: string;
@@ -55,8 +56,9 @@ const BookingPage: React.FC = () => {
     const fetchReviews = async () => {
       setLoading(true);
       try {
+        // Use baseURL instead of hardcoded localhost
         const response = await axios.get(
-          `http://localhost:5000/api/reviews/service/${serviceId}`
+          `${baseURL}/api/reviews/service/${serviceId}`
         );
         setReviews(response.data);
       } catch (error) {
@@ -99,10 +101,7 @@ const BookingPage: React.FC = () => {
     };
 
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/reviews",
-        newReview
-      );
+      const response = await axios.post(`${baseURL}/api/reviews`, newReview);
       setReviews([response.data, ...reviews]);
       setReview("");
       setRating(0);

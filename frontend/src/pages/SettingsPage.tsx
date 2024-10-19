@@ -12,8 +12,9 @@ import {
 import { Spin } from "antd";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { ToastContainer, toast } from "react-toastify"; // Import ToastContainer and toast
-import "react-toastify/dist/ReactToastify.css"; // Import styles 
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { baseURL } from "../utils/baseURL";
 
 type PrivacySettingsKey =
   | "enable2FA"
@@ -43,14 +44,11 @@ const SettingsPage: React.FC = () => {
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get(
-          "http://localhost:5000/api/user/auth/profile",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await axios.get(`${baseURL}/user/auth/profile`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         const { name, email, username } = response.data;
         setUserData({ name, email, password: "", username });
       } catch (error) {
@@ -80,7 +78,7 @@ const SettingsPage: React.FC = () => {
 
       const token = localStorage.getItem("token");
       const response = await axios.put(
-        "http://localhost:5000/api/user/auth/update",
+        `${baseURL}/user/auth/update`,
         updateData,
         {
           headers: {

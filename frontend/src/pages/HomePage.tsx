@@ -16,6 +16,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 import { getServices, Service } from "../redux/slices/servicesSlice";
+import { baseURL } from "../utils/baseURL";
 
 const HomePage: React.FC = () => {
   const [allServices, setAllServices] = useState<Service[]>([]);
@@ -45,7 +46,7 @@ const HomePage: React.FC = () => {
             fetch(
               `https://avatar.iran.liara.run/public/boy?username=${service.businessName}`
             ),
-            fetch(`http://localhost:5000/api/reviews/service/${service._id}`),
+            fetch(`${baseURL}/api/reviews/service/${service._id}`),
           ]);
           const reviews = await reviewsResponse.json();
           const ratingValue =

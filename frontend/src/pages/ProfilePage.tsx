@@ -18,7 +18,7 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     // Ensure auth.user exists and has an id before dispatching fetchProfile
     if (auth && auth.user && auth.user.id) {
-      dispatch(fetchProfile(auth.user.id));
+      dispatch(fetchProfile(auth.user.id)); // Fetch profile using user ID
     }
   }, [auth, dispatch]);
 
@@ -38,7 +38,9 @@ const ProfilePage: React.FC = () => {
           Profile
         </h1>
 
-        {loading && <p>Loading...</p>}
+        {loading && (
+          <p className="text-gray-500 animate-pulse text-center">Loading...</p>
+        )}
         {error && <p className="text-red-500">{error}</p>}
 
         {!loading &&
@@ -46,7 +48,7 @@ const ProfilePage: React.FC = () => {
           (isEditing ? (
             <ProfileForm
               onCancel={() => setIsEditing(false)}
-              onSave={handleProfileUpdated}
+              onSave={handleProfileUpdated} // Call this when profile is saved
             />
           ) : (
             <ProfileDisplay onEdit={() => setIsEditing(true)} />

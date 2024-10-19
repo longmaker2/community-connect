@@ -2,18 +2,18 @@ import Booking from "../../models/booking.js";
 
 export const createBooking = async (req, res) => {
   try {
-    const { date, timeSlot } = req.body;
+    const { date, timeSlot, serviceId } = req.body;
 
-    console.log("Received booking data:", { date, timeSlot });
+    console.log("Received booking data:", { date, timeSlot, serviceId });
 
-    if (!date || !timeSlot) {
-      console.error("Missing fields: ", { date, timeSlot });
+    if (!date || !timeSlot || !serviceId) {
+      console.error("Missing fields: ", { date, timeSlot, serviceId });
       return res.status(400).json({
-        message: "All fields (date, timeSlot) are required.",
+        message: "All fields (date, timeSlot, serviceId) are required.",
       });
     }
 
-    const newBooking = new Booking({ date, timeSlot });
+    const newBooking = new Booking({ date, timeSlot, serviceId });
     await newBooking.save();
 
     console.log("Booking created successfully: ", newBooking);

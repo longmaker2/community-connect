@@ -101,7 +101,7 @@ const BookingPage: React.FC = () => {
     };
 
     try {
-      const response = await axios.post(`${baseURL}/api/reviews`, newReview);
+      const response = await axios.post(`${baseURL}/reviews`, newReview);
       setReviews([response.data, ...reviews]);
       setReview("");
       setRating(0);

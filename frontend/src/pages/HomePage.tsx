@@ -46,7 +46,7 @@ const HomePage: React.FC = () => {
             fetch(
               `https://avatar.iran.liara.run/public/boy?username=${service.businessName}`
             ),
-            fetch(`${baseURL}/api/reviews/service/${service._id}`),
+            fetch(`${baseURL}/reviews/service/${service._id}`),
           ]);
           const reviews = await reviewsResponse.json();
           const ratingValue =

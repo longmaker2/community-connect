@@ -2,11 +2,7 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import Calendar, { CalendarProps } from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import {
-  setBookingDate,
-  setTimeSlot,
-  addBooking,
-} from "../features/bookingSlice";
+import { setBookingDate, addBooking } from "../features/bookingSlice";
 import { baseURL } from "../utils/baseURL";
 import { ClockIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 

@@ -18,7 +18,11 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://community-connect-ffds.onrender.com"],
+    origin: [
+      "http://localhost:3000",
+      "https://community-connect-wp5s.onrender.com",
+      "https://community-connect-rosy.vercel.app",
+    ],
   })
 );
 const port = process.env.PORT || 5000;

@@ -71,6 +71,7 @@ const BookingPage: React.FC = () => {
 
   const { auth } = useAppSelector((state) => state.user);
   const loginUser = auth?.user;
+
   const handleProfilePictureChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -110,6 +111,9 @@ const BookingPage: React.FC = () => {
       console.error("Error submitting review:", error);
     }
   };
+
+  const bookingServiceId = serviceId || "";
+
   return (
     <>
       <Navbar />
@@ -162,7 +166,7 @@ const BookingPage: React.FC = () => {
               </select>
               <span>
                 <p className="py-3 font-semibold">
-                  Add your profile pic(optional)
+                  Add your profile pic (optional)
                 </p>
                 <input
                   type="file"
@@ -226,10 +230,11 @@ const BookingPage: React.FC = () => {
           </div>
 
           <div className="sticky top-0 self-start animate-slideInRight">
-            <Booking />
+            <Booking serviceId={bookingServiceId} />
           </div>
         </div>
       </div>
+
       {loginUser && loginUser.userType === "consumer" && (
         <ChatPopup
           userId={loginUser.id}

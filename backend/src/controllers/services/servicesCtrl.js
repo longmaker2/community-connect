@@ -41,13 +41,16 @@ export const createServiceCtrl = async (req, res) => {
 
 export const getServiceCtrl = async (req, res) => {
   try {
-    const services = await Service.find({ provider: req.params.id });
-    if (!services.length) {
-      return res.status(404).json({ message: "No services found yet" });
+    const serviceId = req.params.id;
+    const service = await Service.findById(serviceId);
+
+    if (!service) {
+      return res.status(404).json({ message: "Service not found" });
     }
-    res.status(200).json({ services });
+
+    res.status(200).json({ service });
   } catch (error) {
-    console.error(`Error fetching services: ${error.message}`);
+    console.error(`Error fetching service: ${error.message}`);
     res.status(500).json({ message: "Something went wrong" });
   }
 };

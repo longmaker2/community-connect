@@ -2,16 +2,25 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import Calendar, { CalendarProps } from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { setBookingDate, addBooking } from "../features/bookingSlice";
+import {
+  setBookingDate,
+  setTimeSlot,
+  addBooking,
+} from "../features/bookingSlice";
 import { baseURL } from "../utils/baseURL";
 import { ClockIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 
-const Booking: React.FC = () => {
+interface BookingProps {
+  serviceId: string;
+}
+
+const Booking: React.FC<BookingProps> = ({ serviceId }) => {
   const [date, setDate] = useState<Date | null>(new Date());
   const [timeSlot, setTimeSlot] = useState<string | null>(null);
   const [bookingConfirmed, setBookingConfirmed] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [bookingError, setBookingError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const dispatch = useDispatch();
 
@@ -27,7 +36,6 @@ const Booking: React.FC = () => {
     "5:00 PM",
   ];
 
-  // Handle date selection
   const handleDateChange: CalendarProps["onChange"] = (value) => {
     if (value instanceof Date) {
       setDate(value);
@@ -43,6 +51,7 @@ const Booking: React.FC = () => {
     const bookingData = {
       date,
       timeSlot,
+      serviceId,
     };
 
     console.log("Sending booking data:", bookingData);
@@ -52,6 +61,7 @@ const Booking: React.FC = () => {
       return;
     }
 
+    setLoading(true);
     try {
       setBookingError(null);
       const response = await fetch(`${baseURL}/bookings`, {
@@ -77,6 +87,8 @@ const Booking: React.FC = () => {
     } catch (error: any) {
       setBookingError(`Error creating booking: ${error.message}`);
       console.error("Error creating booking: ", error.message, error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -86,14 +98,12 @@ const Booking: React.FC = () => {
 
   return (
     <div className="booking-container p-4 bg-gray-50 rounded-lg shadow-md max-w-full animate-fadeIn">
-      {/* Display error message if booking fails */}
       {bookingError && (
         <div className="mb-4 text-red-600 bg-red-100 p-3 rounded-md">
           {bookingError}
         </div>
       )}
 
-      {/* Calendar Section */}
       <div className="mb-6">
         <Calendar
           onChange={handleDateChange}
@@ -102,7 +112,6 @@ const Booking: React.FC = () => {
         />
       </div>
 
-      {/* Time Slot Selection */}
       <div className="time-slot-selection mb-6">
         <h3 className="text-xl font-semibold mb-4">Select a Time Slot</h3>
         <div className="grid grid-cols-3 gap-4">
@@ -123,17 +132,21 @@ const Booking: React.FC = () => {
         </div>
       </div>
 
-      {/* Confirm Button */}
       <button
         onClick={confirmBooking}
         className="mt-6 w-full bg-gray-800 text-white py-3 rounded-md hover:bg-gray-600 hover:scale-105 transition-transform duration-300 flex items-center justify-center"
-        disabled={!timeSlot || !date}
+        disabled={!timeSlot || !date || loading}
       >
-        <CheckCircleIcon className="h-5 w-5 mr-2" />
-        Confirm Booking
+        {loading ? (
+          <span>Loading...</span>
+        ) : (
+          <>
+            <CheckCircleIcon className="h-5 w-5 mr-2" />
+            Confirm Booking
+          </>
+        )}
       </button>
 
-      {/* Booking Summary */}
       {bookingConfirmed && (
         <div className="mt-6 bg-green-100 p-4 rounded-md transition-transform animate-bounceIn">
           <h3 className="text-xl font-bold mb-2">Booking Summary</h3>
@@ -146,7 +159,6 @@ const Booking: React.FC = () => {
         </div>
       )}
 
-      {/* Popup Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full transform scale-105">

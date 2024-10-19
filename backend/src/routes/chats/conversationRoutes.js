@@ -1,10 +1,20 @@
-import express from 'express';
-import  authMiddleware  from '../../middlewares/authMiddleware.js';
-import { createConversationCtrl, getConversationCtrl, getOurConversationCtrl } from '../../controllers/chats/ConversationCtrl.js';
-const route = express.Router();
+import express from "express";
+import authMiddleware from "../../middlewares/authMiddleware.js";
+import {
+  createConversationCtrl,
+  getConversationCtrl,
+  getOurConversationCtrl,
+} from "../../controllers/chats/conversationCtrl.js";
 
-route.post('/new', createConversationCtrl);
-route.get('/:userId', getConversationCtrl);
-route.get('/our/:firstUserId/:secondUserId', getOurConversationCtrl);
+const router = express.Router();
 
-export default route;
+// Apply `authMiddleware` to protect these routes
+router.post("/new", authMiddleware, createConversationCtrl);
+router.get("/:userId", authMiddleware, getConversationCtrl);
+router.get(
+  "/our/:firstUserId/:secondUserId",
+  authMiddleware,
+  getOurConversationCtrl
+);
+
+export default router;

@@ -18,16 +18,16 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     // Ensure auth.user exists and has an id before dispatching fetchProfile
     if (auth && auth.user && auth.user.id) {
-      dispatch(fetchProfile(auth.user.id)); // Fetch profile using user ID
+      dispatch(fetchProfile(auth.user.id));
     }
   }, [auth, dispatch]);
 
   // Fetch updated profile data after the profile is edited and saved
   const handleProfileUpdated = () => {
     if (auth && auth.user && auth.user.id) {
-      dispatch(fetchProfile(auth.user.id)); // Fetch updated profile
+      dispatch(fetchProfile(auth.user.id));
     }
-    setIsEditing(false); // Close the form after update
+    setIsEditing(false);
   };
 
   return (

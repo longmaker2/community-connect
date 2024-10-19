@@ -12,7 +12,7 @@ const ProfilePage: React.FC = () => {
 
   // Use userSlice for authentication data
   const userState = useAppSelector((state) => state.user);
-  const { auth } = userState; // Extract auth object
+  const { auth } = userState;
   const { loading, error } = useAppSelector((state) => state.profile);
 
   useEffect(() => {
@@ -48,7 +48,7 @@ const ProfilePage: React.FC = () => {
           (isEditing ? (
             <ProfileForm
               onCancel={() => setIsEditing(false)}
-              onSave={handleProfileUpdated} // Call this when profile is saved
+              onSave={handleProfileUpdated}
             />
           ) : (
             <ProfileDisplay onEdit={() => setIsEditing(true)} />

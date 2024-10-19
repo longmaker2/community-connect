@@ -1,6 +1,7 @@
 import User from "../../models/user.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import Profile from "../../models/profile.js";
 
 export const userRegistrationCtrl = async (req, res) => {
   try {
@@ -31,6 +32,23 @@ export const userRegistrationCtrl = async (req, res) => {
       address,
     });
 
+    // Create a profile automatically for the new user
+    const profile = await Profile.create({
+      userId: user._id,
+      services: "",
+      pricing: "",
+      availability: "",
+      location: "",
+      bio: "",
+      profileImage: null,
+      portfolioImages: [],
+      socialLinks: {
+        facebook: "",
+        instagram: "",
+        linkedin: "",
+      },
+    });
+
     const token = jwt.sign(
       { email: user.email, id: user._id },
       process.env.JWT_SECRET,
@@ -39,6 +57,7 @@ export const userRegistrationCtrl = async (req, res) => {
 
     res.status(201).json({
       user: { id: user._id, email: user.email, userType: user.userType },
+      profile,
       token,
     });
   } catch (error) {

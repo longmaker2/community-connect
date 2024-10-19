@@ -1,11 +1,34 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ProfileDisplay from "../components/ProfileDisplay";
 import ProfileForm from "../components/ProfileForm";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { useAppDispatch, useAppSelector } from "../redux/store/store";
+import { fetchProfile } from "../redux/slices/profileSlice";
 
 const ProfilePage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
+  const dispatch = useAppDispatch();
+
+  // Use userSlice for authentication data
+  const userState = useAppSelector((state) => state.user);
+  const { auth } = userState; // Extract auth object
+  const { loading, error } = useAppSelector((state) => state.profile);
+
+  useEffect(() => {
+    // Ensure auth.user exists and has an id before dispatching fetchProfile
+    if (auth && auth.user && auth.user.id) {
+      dispatch(fetchProfile(auth.user.id));
+    }
+  }, [auth, dispatch]);
+
+  // Fetch updated profile data after the profile is edited and saved
+  const handleProfileUpdated = () => {
+    if (auth && auth.user && auth.user.id) {
+      dispatch(fetchProfile(auth.user.id)); // Fetch updated profile
+    }
+    setIsEditing(false); // Close the form after update
+  };
 
   return (
     <>
@@ -15,11 +38,19 @@ const ProfilePage: React.FC = () => {
           Profile
         </h1>
 
-        {isEditing ? (
-          <ProfileForm onCancel={() => setIsEditing(false)} />
-        ) : (
-          <ProfileDisplay onEdit={() => setIsEditing(true)} />
-        )}
+        {loading && <p>Loading...</p>}
+        {error && <p className="text-red-500">{error}</p>}
+
+        {!loading &&
+          !error &&
+          (isEditing ? (
+            <ProfileForm
+              onCancel={() => setIsEditing(false)}
+              onSave={handleProfileUpdated}
+            />
+          ) : (
+            <ProfileDisplay onEdit={() => setIsEditing(true)} />
+          ))}
       </div>
       <Footer />
     </>

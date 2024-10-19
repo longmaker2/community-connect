@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "../store/store";
 import { useAppSelector } from "../redux/store/store";
 import axios from "axios";
 import ChatPopup from "./Chatting";
@@ -11,12 +9,12 @@ interface Conversation {
 }
 
 const ProfileDisplay: React.FC<{ onEdit: () => void }> = ({ onEdit }) => {
-  const profile = useSelector((state: RootState) => state.profile);
+  const profile = useAppSelector((state) => state.profile);
   const [allConversations, setAllConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<
     string | null
   >(null);
-  const { auth } = useAppSelector((state) => state.user);
+  const { auth } = useAppSelector((state) => state.auth);
   const loginUser = auth?.user;
 
   useEffect(() => {
@@ -35,13 +33,14 @@ const ProfileDisplay: React.FC<{ onEdit: () => void }> = ({ onEdit }) => {
       fetchConversations(loginUser.id);
     }
   }, [loginUser]);
+
   return (
     <div className="profile-display max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md">
       {/* Profile Image */}
       <div className="mb-6 text-center">
         {profile?.profileImage ? (
           <img
-            src={URL.createObjectURL(profile?.profileImage)}
+            src={profile?.profileImage}
             alt="Profile"
             className="w-32 h-32 object-cover rounded-full mx-auto border mb-4"
           />
@@ -94,16 +93,17 @@ const ProfileDisplay: React.FC<{ onEdit: () => void }> = ({ onEdit }) => {
       <div className="mb-6">
         <h3 className="text-xl font-bold mb-4">Portfolio</h3>
         <div className="grid grid-cols-2 gap-4">
-          {profile?.portfolioImages?.map((image, index) => (
+          {profile?.portfolioImages?.map((image: string, index: number) => (
             <img
               key={index}
-              src={URL.createObjectURL(image)}
+              src={image}
               alt={`Portfolio ${index + 1}`}
               className="w-full h-32 object-cover rounded-md"
             />
           ))}
         </div>
       </div>
+
       {loginUser?.userType === "business" && (
         <div className="absolute top-20 right-0">
           <h3 className="text-xl font-bold mb-4">Conversations</h3>

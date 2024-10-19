@@ -8,6 +8,8 @@ import connectDb from "./src/config/connectDb.js";
 import dotenv from "dotenv";
 import cors from "cors";
 import reviewRoutes from "./src/routes/reviewRoutes.js";
+import profileRoutes from "./src/routes/profileRoutes.js"; // Ensure this path is correct
+import { protect } from "./src/middlewares/protect.js"; // Correct import
 
 dotenv.config();
 
@@ -28,5 +30,6 @@ app.use("/api/conversation", conversationRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/profile", profileRoutes); // Ensure this path is correct
 
 app.listen(port, () => console.log(`Server started on port ${port}`));

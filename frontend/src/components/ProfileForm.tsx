@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { updateProfile } from "../features/profileSlice";
-import { RootState } from "../store/store";
+import { useAppDispatch, useAppSelector } from "../redux/store/store";
+import { updateProfile } from "../redux/slices/profileSlice";
 import {
   PhotoIcon,
   UserCircleIcon,
@@ -11,8 +10,13 @@ import {
   MapPinIcon,
 } from "@heroicons/react/24/outline";
 
-const ProfileForm: React.FC<{ onCancel: () => void }> = ({ onCancel }) => {
-  const profile = useSelector((state: RootState) => state.profile);
+const ProfileForm: React.FC<{ onCancel: () => void; onSave: () => void }> = ({
+  onCancel,
+  onSave,
+}) => {
+  const profile = useAppSelector((state) => state.profile);
+  const dispatch = useAppDispatch();
+
   const [services, setServices] = useState(profile.services);
   const [pricing, setPricing] = useState(profile.pricing);
   const [availability, setAvailability] = useState(profile.availability);
@@ -25,7 +29,6 @@ const ProfileForm: React.FC<{ onCancel: () => void }> = ({ onCancel }) => {
     instagram: profile.socialLinks?.instagram || "",
     linkedin: profile.socialLinks?.linkedin || "",
   });
-  const dispatch = useDispatch();
 
   const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -41,26 +44,37 @@ const ProfileForm: React.FC<{ onCancel: () => void }> = ({ onCancel }) => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(
-      updateProfile({
-        services,
-        pricing,
-        availability,
-        location,
-        bio,
-        profileImage,
-        portfolioImages,
-        socialLinks,
-      })
-    );
-    onCancel();
+
+    const formData = new FormData();
+    formData.append("services", services);
+    formData.append("pricing", pricing);
+    formData.append("availability", availability);
+    formData.append("location", location);
+    formData.append("bio", bio);
+    if (profileImage) {
+      formData.append("profileImage", profileImage);
+    }
+    portfolioImages.forEach((file, index) => {
+      formData.append(`portfolioImages[${index}]`, file);
+    });
+    formData.append("socialLinks[facebook]", socialLinks.facebook);
+    formData.append("socialLinks[instagram]", socialLinks.instagram);
+    formData.append("socialLinks[linkedin]", socialLinks.linkedin);
+
+    try {
+      await dispatch(updateProfile(formData));
+      onSave();
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
   };
 
   return (
     <form
       onSubmit={handleSubmit}
+      encType="multipart/form-data"
       className="max-w-lg mx-auto p-6 bg-gray-50 rounded-lg shadow-md animate-fadeIn"
     >
       <h2 className="text-2xl font-bold mb-4">Edit Your Profile</h2>

@@ -51,13 +51,7 @@ export const registerUser = createAsyncThunk<
     );
     // Store user data and token in localStorage
     localStorage.setItem("token", response.data.token);
-    if (response.data.user.userType === "customer") {
-      localStorage.setItem("customerInfo", JSON.stringify(response.data));
-    } else if (response.data.user.userType === "business") {
-      localStorage.setItem("businessInfo", JSON.stringify(response.data));
-    } else {
-      localStorage.setItem("artisanInfo", JSON.stringify(response.data));
-    }
+    localStorage.setItem("userInfo", JSON.stringify(response.data));
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -84,13 +78,7 @@ export const loginUser = createAsyncThunk<
     );
     // Store user data and token in localStorage
     localStorage.setItem("token", response.data.token);
-    if (response.data.user.userType === "consumer") {
-      localStorage.setItem("consumerInfo", JSON.stringify(response.data));
-    } else if (response.data.user.userType === "business") {
-      localStorage.setItem("businessInfo", JSON.stringify(response.data));
-    } else {
-      localStorage.setItem("artisanInfo", JSON.stringify(response.data));
-    }
+    localStorage.setItem("userInfo", JSON.stringify(response.data));
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -106,9 +94,7 @@ export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
     try {
       // Remove all user info and token from localStorage
       localStorage.removeItem("token");
-      localStorage.removeItem("customerInfo");
-      localStorage.removeItem("businessInfo");
-      localStorage.removeItem("artisanInfo");
+      localStorage.removeItem("userInfo");
     } catch (error) {
       return rejectWithValue("Logout failed");
     }
@@ -116,11 +102,7 @@ export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
 );
 
 // Initialize state
-const tokenFromStorage = localStorage.getItem("token");
-const userInfoFromStorage =
-  localStorage.getItem("consumerInfo") ||
-  localStorage.getItem("businessInfo") ||
-  localStorage.getItem("artisanInfo");
+const userInfoFromStorage = localStorage.getItem("userInfo");
 const initialState: UserState = {
   auth: userInfoFromStorage ? JSON.parse(userInfoFromStorage) : null,
   loading: false,

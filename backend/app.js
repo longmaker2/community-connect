@@ -23,6 +23,8 @@ app.use(
       "https://community-connect-wp5s.onrender.com",
       "https://community-connect-rosy.vercel.app",
     ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
   })
 );
 const port = process.env.PORT || 5000;

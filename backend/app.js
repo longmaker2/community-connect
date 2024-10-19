@@ -20,7 +20,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://community-connect-wp5s.onrender.com",
+      "https://community-connect-vg2s.onrender.com",
       "https://community-connect-rosy.vercel.app",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],

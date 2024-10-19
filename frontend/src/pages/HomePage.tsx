@@ -336,7 +336,7 @@ const HomePage: React.FC = () => {
           and grow your business.
         </p>
         <button
-          onClick={() => navigate("/provider-registration")} // Navigate to the provider registration page
+          onClick={() => navigate("/provider-registration")}
           className="bg-gray-800 text-white hover:bg-gray-600 py-1 px-10 rounded-md text-lg transition-transform transform hover:scale-110 duration-300"
         >
           Register Now

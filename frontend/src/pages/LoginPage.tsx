@@ -114,7 +114,9 @@ const LoginPage: React.FC = () => {
             onChange={handleInputChange}
             className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 transition"
           >
-            <option value="" className="hidden">Select user type</option>
+            <option value="" className="hidden">
+              Select user type
+            </option>
             <option value="consumer">Consumer</option>
             <option value="business">Business</option>
             <option value="artisan">Artisan</option>

@@ -2,7 +2,9 @@ import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import React, { Fragment, useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux"; // Import useSelector from redux
 import ProfilePicture from "../assets/images/Long-profile-picture.jpg";
+import { RootState } from "../redux/store/store"; // Import RootState for typing
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -20,6 +22,10 @@ export default function Navbar() {
   const location = useLocation();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
+
+  // Get the authentication state from redux store
+  const user = useSelector((state: RootState) => state.user);
+  const isLoggedIn = user?.auth?.token ? true : false; // Set isLoggedIn based on token presence in redux store
 
   const notifications = [
     "You have a new booking request.",
@@ -54,7 +60,8 @@ export default function Navbar() {
   }, [isNotificationOpen]);
 
   const handleSignOut = () => {
-    console.log("User signed out");
+    // Dispatch your logout action to clear auth state in redux here
+    // navigate to login after logout
     navigate("/login");
   };
 
@@ -102,116 +109,137 @@ export default function Navbar() {
                 </div>
               </div>
 
-              {/* Notification Icon */}
+              {/* Right side of the navbar */}
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-                <div className="relative" ref={notificationRef}>
-                  <button
-                    onClick={toggleNotification}
-                    className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 transition-transform duration-200"
-                  >
-                    <span className="sr-only">View notifications</span>
-                    <BellIcon className="h-6 w-6" aria-hidden="true" />
-                  </button>
+                {!isLoggedIn ? (
+                  // Show Login and Register buttons when not logged in
+                  <>
+                    <Link
+                      to="/login"
+                      className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                    >
+                      Register
+                    </Link>
+                  </>
+                ) : (
+                  // Show Notifications and Profile dropdown when logged in
+                  <>
+                    <div className="relative" ref={notificationRef}>
+                      <button
+                        onClick={toggleNotification}
+                        className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 transition-transform duration-200"
+                      >
+                        <span className="sr-only">View notifications</span>
+                        <BellIcon className="h-6 w-6" aria-hidden="true" />
+                      </button>
 
-                  {/* Notification Dropdown */}
-                  <Transition
-                    show={isNotificationOpen}
-                    as={Fragment}
-                    enter="transition ease-out duration-300"
-                    enterFrom="transform opacity-0 scale-95"
-                    enterTo="transform opacity-100 scale-100"
-                    leave="transition ease-in duration-200"
-                    leaveFrom="transform opacity-100 scale-100"
-                    leaveTo="transform opacity-0 scale-95"
-                  >
-                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg z-10 transition-all duration-300 ease-in-out">
-                      <div className="p-4 text-sm font-semibold text-gray-800 border-b">
-                        Notifications
-                      </div>
-                      <ul className="max-h-60 overflow-y-auto">
-                        {notifications.length > 0 ? (
-                          notifications.map((notification, index) => (
-                            <li
-                              key={index}
-                              className="p-4 text-gray-600 border-b last:border-none"
-                            >
-                              {notification}
-                            </li>
-                          ))
-                        ) : (
-                          <li className="p-4 text-gray-500">
-                            No notifications
-                          </li>
-                        )}
-                      </ul>
+                      {/* Notification Dropdown */}
+                      <Transition
+                        show={isNotificationOpen}
+                        as={Fragment}
+                        enter="transition ease-out duration-300"
+                        enterFrom="transform opacity-0 scale-95"
+                        enterTo="transform opacity-100 scale-100"
+                        leave="transition ease-in duration-200"
+                        leaveFrom="transform opacity-100 scale-100"
+                        leaveTo="transform opacity-0 scale-95"
+                      >
+                        <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg z-10 transition-all duration-300 ease-in-out">
+                          <div className="p-4 text-sm font-semibold text-gray-800 border-b">
+                            Notifications
+                          </div>
+                          <ul className="max-h-60 overflow-y-auto">
+                            {notifications.length > 0 ? (
+                              notifications.map((notification, index) => (
+                                <li
+                                  key={index}
+                                  className="p-4 text-gray-600 border-b last:border-none"
+                                >
+                                  {notification}
+                                </li>
+                              ))
+                            ) : (
+                              <li className="p-4 text-gray-500">
+                                No notifications
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+                      </Transition>
                     </div>
-                  </Transition>
-                </div>
 
-                {/* Profile dropdown */}
-                <Menu as="div" className="relative ml-3">
-                  <div>
-                    <Menu.Button className="flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 transition-transform duration-200">
-                      <span className="sr-only">Open user menu</span>
-                      <img
-                        className="h-8 w-8 rounded-full"
-                        src={ProfilePicture}
-                        alt="User Avatar"
-                      />
-                    </Menu.Button>
-                  </div>
-                  <Transition
-                    as={Fragment}
-                    enter="transition ease-out duration-300"
-                    enterFrom="transform opacity-0 scale-95"
-                    enterTo="transform opacity-100 scale-100"
-                    leave="transition ease-in duration-200"
-                    leaveFrom="transform opacity-100 scale-100"
-                    leaveTo="transform opacity-0 scale-95"
-                  >
-                    <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none transition-all transform duration-300">
-                      <Menu.Item>
-                        {({ active }) => (
-                          <Link
-                            to="/profile"
-                            className={classNames(
-                              active ? "bg-gray-100" : "",
-                              "block px-4 py-2 text-sm text-gray-700"
+                    {/* Profile dropdown */}
+                    <Menu as="div" className="relative ml-3">
+                      <div>
+                        <Menu.Button className="flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 transition-transform duration-200">
+                          <span className="sr-only">Open user menu</span>
+                          <img
+                            className="h-8 w-8 rounded-full"
+                            src={ProfilePicture}
+                            alt="User Avatar"
+                          />
+                        </Menu.Button>
+                      </div>
+                      <Transition
+                        as={Fragment}
+                        enter="transition ease-out duration-300"
+                        enterFrom="transform opacity-0 scale-95"
+                        enterTo="transform opacity-100 scale-100"
+                        leave="transition ease-in duration-200"
+                        leaveFrom="transform opacity-100 scale-100"
+                        leaveTo="transform opacity-0 scale-95"
+                      >
+                        <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none transition-all transform duration-300">
+                          <Menu.Item>
+                            {({ active }) => (
+                              <Link
+                                to="/profile"
+                                className={classNames(
+                                  active ? "bg-gray-100" : "",
+                                  "block px-4 py-2 text-sm text-gray-700"
+                                )}
+                              >
+                                Profile
+                              </Link>
                             )}
-                          >
-                            Profile
-                          </Link>
-                        )}
-                      </Menu.Item>
-                      <Menu.Item>
-                        {({ active }) => (
-                          <Link
-                            to="/settings"
-                            className={classNames(
-                              active ? "bg-gray-100" : "",
-                              "block px-4 py-2 text-sm text-gray-700"
+                          </Menu.Item>
+                          <Menu.Item>
+                            {({ active }) => (
+                              <Link
+                                to="/settings"
+                                className={classNames(
+                                  active ? "bg-gray-100" : "",
+                                  "block px-4 py-2 text-sm text-gray-700"
+                                )}
+                              >
+                                Settings
+                              </Link>
                             )}
-                          >
-                            Settings
-                          </Link>
-                        )}
-                      </Menu.Item>
-                      <Menu.Item>
-                        {({ active }) => (
-                          <button
-                            onClick={handleSignOut}
-                            className={classNames(
-                              active ? "bg-gray-100" : "",
-                              "block px-4 py-2 text-sm text-gray-700"
+                          </Menu.Item>
+                          <Menu.Item>
+                            {({ active }) => (
+                              <button
+                                onClick={handleSignOut}
+                                className={classNames(
+                                  active ? "bg-gray-100" : "",
+                                  "block px-4 py-2 text-sm text-gray-700"
+                                )}
+                              >
+                                Sign out
+                              </button>
                             )}
-                          >
-                            Sign out
-                          </button>
-                        )}
-                      </Menu.Item>
-                    </Menu.Items>
-                  </Transition>
-                </Menu>
+                          </Menu.Item>
+                        </Menu.Items>
+                      </Transition>
+                    </Menu>
+                  </>
+                )}
               </div>
             </div>
           </div>
